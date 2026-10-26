@@ -645,7 +645,11 @@ function m1Rules(){
     ["How is your name?","What is your name?","Русское «как тебя зовут» — по-английски «что твоё имя»."],
     ["How many years are you?","How old are you?","Возраст — только через How old."],
     ["Is your flat is big?","Is your flat big?","Be один: он переехал вперёд, на старом месте его больше нет."],
-    ["Where did you born?","Where were you born?","«Родиться» — be born, поэтому was / were, а не did."]];
+    ["Where did you born?","Where were you born?","«Родиться» — be born, поэтому was / were, а не did."],
+    ["Did you tire?","Are you tired?","«Устал» по-русски прошлое, но по-английски это состояние: be tired."],
+    ["Are you boring? (= тебе скучно?)","Are you bored?","Boring — «скучный, занудный». Что чувствуешь ты — bored."],
+    ["Is it cold for you?","Are you cold?","«Мне холодно» → «я холодный»: человек становится подлежащим."],
+    ["How do you feel yourself?","How do you feel?","После feel не нужен yourself."]];
   return [
   {id:"why",title:"Почему это трудно",body:`
     <p>В русском вопрос отличается от утверждения только интонацией: «Ты готов.» → «Ты готов?». Слова остаются на своих местах.</p>
@@ -718,6 +722,59 @@ function m1Rules(){
       [ex("Do you agree with me?"),"agree <b>with</b> — с человеком или его мнением."],
       [ex("Did they agree to the plan?"),"agree <b>to</b> — на предложение, план, условия."],
       [ex("Are you OK with that?"),"Тебя это устраивает? — разговорный вариант через be."]])}`},
+  {id:"trapwords",title:"Словарь ловушек: be или do?",body:`
+    <p>Самые частые слова, на которых русскоговорящие путают be и do. Их четыре группы — пробеги глазами и запомни «странные» пары.</p>
+    <h3>1. По-русски состояние — по-английски глагол → do</h3>
+    ${rows(["По-русски","По-английски","Вопрос"],[
+      ["Ты согласен?","agree",ex("Do you agree?")],
+      ["Тебе нужна помощь?","need",ex("Do you need help?")],
+      ["Сколько я тебе должен?","owe",ex("How much do I owe you?")],
+      ["Ты должен (обязан) идти?","have to",ex("Do you have to go?")],
+      ["Вы знакомы?","know each other",ex("Do you know each other?")],
+      ["Ты похож на маму?","look like / take after",ex("Do you look like your mum?")],
+      ["Ты не против?","mind",ex("Do you mind?")],
+      ["Ты в курсе?","know",ex("Do you know about it?")],
+      ["Тебе нравится?","like",ex("Do you like it?")],
+      ["Тебе хочется погулять?","feel like + -ing",ex("Do you feel like going for a walk?")]])}
+    <h3>2. По-русски глагол — по-английски прилагательное → be</h3>
+    <p>Особенно коварны глаголы в прошедшем времени: «устал», «опоздал». По-русски это прошлое, а по-английски — состояние сейчас.</p>
+    ${rows(["По-русски","По-английски","Вопрос"],[
+      ["Ты устал?","tired",ex("Are you tired?")+" — не "+strike("Did you tire?")],
+      ["Ты опоздал? / опаздываешь?","late",ex("Are you late?")],
+      ["Ты проголодался?","hungry",ex("Are you hungry?")],
+      ["Ты замёрз?","cold",ex("Are you cold?")],
+      ["Ты заблудился?","lost",ex("Are you lost?")],
+      ["Ты боишься? / испугался?","afraid / scared",ex("Are you scared?")],
+      ["Ты злишься?","angry",ex("Are you angry?")],
+      ["Ты обиделся?","upset / offended",ex("Are you upset?")],
+      ["Ты волнуешься?","worried / nervous",ex("Are you nervous?")],
+      ["Ты заболел?","ill / sick",ex("Are you ill?")],
+      ["Ты удивился?","surprised",ex("Were you surprised?")],
+      ["Ты интересуешься искусством?","interested in",ex("Are you interested in art?")],
+      ["Ты влюбился?","in love",ex("Are you in love?")],
+      ["Где ты родился?","born",ex("Where were you born?")]])}
+    <h3>3. «Мне холодно» → «Я холодный»: человек становится подлежащим</h3>
+    <p>Русские безличные фразы с «мне / тебе» в английском строятся от человека: не «тебе холодно», а «ты холодный» — <span class="mono">Are you cold?</span></p>
+    ${rows(["По-русски","Вопрос","Не так"],[
+      ["Тебе холодно?",ex("Are you cold?"),strike("Is it cold for you?")],
+      ["Тебе жарко?",ex("Are you hot?"),strike("Is it hot to you?")],
+      ["Тебе скучно?",ex("Are you bored?"),strike("Is it boring to you?")],
+      ["Тебе страшно?",ex("Are you scared?"),strike("Is it scary for you?")],
+      ["Тебе стыдно?",ex("Are you ashamed?"),strike("Is it shameful?")],
+      ["Тебе больно?",ex("Does it hurt?")+" "+ex("Are you hurt?"),strike("Is it painful to you?")],
+      ["Тебе нужно / надо?",ex("Do you need to…?")+" "+ex("Do you have to…?"),strike("Is it needed to you?")],
+      ["Мне можно?",ex("Can I…?"),strike("Is it possible to me?")],
+      ["Как ты себя чувствуешь?",ex("How do you feel?"),strike("How do you feel yourself?")]])}
+    <h3>4. bored или boring: -ed и -ing</h3>
+    <p>Прилагательное на <b>-ed</b> — что чувствуешь ты. На <b>-ing</b> — какой ты (или вещь) для других. Перепутаешь — и получится обидно.</p>
+    ${rows(["Хочешь спросить","Правильно","Ловушка"],[
+      ["Тебе скучно?",ex("Are you bored?"),mn("Are you boring? — «Ты зануда?»")],
+      ["Тебе интересно?",ex("Are you interested?"),mn("Are you interesting? — «Ты интересный человек?»")],
+      ["Ты устал?",ex("Are you tired?"),mn("Are you tiring? — «Ты утомительный?»")],
+      ["Ты в восторге?",ex("Are you excited?"),mn("Are you exciting? — «Ты захватывающий?»")],
+      ["Ты запутался?",ex("Are you confused?"),mn("Are you confusing? — «Ты сбиваешь с толку?»")],
+      ["Тебе неловко?",ex("Are you embarrassed?"),mn("Are you embarrassing? — «Ты позоришь?»")]])}
+    <div class="note">Правило одно для всех групп: смотри не на русское слово, а на <b>английское</b>. Глагол (agree, need, like, mind) → do. Прилагательное (tired, cold, bored, afraid) → be.</div>`},
   {id:"wh",title:"Вопросительные слова с be",body:`
     ${rows(["Слово","Значение","Пример"],[
       ["What","что, какой",ex("What is your name?")],["Where","где; откуда (+ from)",ex("Where are my keys?")],
@@ -859,7 +916,8 @@ CONTENT.m2.rules = function(){
         <span>хотеть есть</span>${ex("Do you want to eat?")}<span>преподавать</span>${ex("Does she teach?")}<span>стоить</span>${ex("Does it cost a lot?")}
         <span>происходить</span>${ex("Do you come from Spain?")}<span>курить</span>${ex("Do you smoke?")}</div></div>
     </div>
-    <div class="note">Do и be в одном простом вопросе не встречаются. Ни <span class="mono">Do you are…</span>, ни <span class="mono">Are you like…</span>.</div>`},
+    <div class="note">Do и be в одном простом вопросе не встречаются. Ни <span class="mono">Do you are…</span>, ни <span class="mono">Are you like…</span>.</div>
+    <p>Самые коварные пары собраны в <b>«Словаре ловушек»</b> урока модуля 1: «согласен → agree», «устал → tired», «мне холодно → I'm cold», «bored или boring». <button class="linkbtn" data-act="lesson" data-id="m1">Открыть урок модуля 1 →</button></p>`},
   {id:"have",title:"Have: «у тебя есть…?»",body:`
     <p><b>Have</b> («иметь») — обычный глагол, поэтому с ним нужен do / does:</p>
     ${grp([["a","Do"],["s","you"],["v","have"],["o","a car"],["p","?"]])}
