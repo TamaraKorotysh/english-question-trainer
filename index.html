@@ -693,6 +693,31 @@ function m1Rules(){
         <span>верить</span>${ex("Do you believe me?")}<span>значить</span>${ex("What does it mean?")}</div></div>
     </div>
     <div class="note">Проверка: можно ли сказать «он <i>является</i> …ым» или «он <i>находится</i> …»? Тогда be. Если слово отвечает на «что делает?» — это глагол, и ему нужен do (модуль 2).</div>`},
+  {id:"shortadj",title:"«Согласен», «нужен», «должен» — в английском это глаголы",body:`
+    <p>«Ты <b>согласен</b>?» — по-русски это <b>краткое прилагательное</b>, как «готов», «рад», «уверен». Оно описывает состояние, а связка «есть» в настоящем времени просто пропадает: «Ты (есть) согласен?». Поэтому рука тянется перевести так же, как «Ты готов?» → ${strike("Are you agree?")}</p>
+    <p>Но в английском для «согласен» <b>нет прилагательного</b>. Есть только глагол <b>agree</b> — «соглашаться». Русский описывает это как состояние («я согласен»), английский — как действие («я соглашаюсь»). А глаголу нужен помощник do, а не be.</p>
+    ${rows(["","Готов — прилагательное","Согласен — в английском глагол"],[
+      ["Утверждение",mn("I <b>am</b> ready."),mn("I <b>agree</b>.")],
+      ["Вопрос",ex("Are you ready?"),ex("Do you agree?")],
+      ["Отрицание",mn("I'm not ready."),mn("I <b>don't</b> agree. / I disagree.")],
+      ["Прошлое",ex("Were you ready?"),ex("Did you agree?")],
+      ["Краткий ответ",mn("Yes, I am."),mn("Yes, I do.")]])}
+    <p>Та же ловушка с другими краткими прилагательными:</p>
+    ${rows(["По-русски","По-английски","Вопрос"],[
+      ["согласен","agree (глагол)",ex("Do you agree?")],
+      ["нужен, нужна","need (глагол): «мне нужна» = «я нуждаюсь»",ex("Do you need help?")],
+      ["должен (денег)","owe (глагол)",ex("How much do I owe you?")],
+      ["должен (обязан)","have to: тоже обычный глагол",ex("Do you have to work today?")]])}
+    <p>А вот эти краткие прилагательные в английском — тоже прилагательные, с ними be: <span class="mono">готов → Are you ready? уверен → Are you sure? рад → Are you glad? женат → Are you married?</span></p>
+    <div class="note"><b>Проверка через to.</b> Подставь to перед английским словом. Звучит как глагол (<span class="mono">to agree, to need, to owe</span>) — значит, вопрос с do. Не звучит (<span class="mono">to ready, to sure</span> — бессмыслица) — значит, это прилагательное, и вопрос с be.</div>
+    <p><b>Проверка ответом.</b> На <span class="mono">Do you agree?</span> отвечают <span class="mono">Yes, I do</span>. Если хочется ответить <span class="mono">Yes, I am</span> — значит, нужен be.</p>
+    <p>Полезные фразы с agree:</p>
+    ${rows(["Фраза","Значение"],[
+      [ex("I disagree."),"Я не согласен. Звучит естественнее, чем I don't agree."],
+      [ex("Agreed?"),"Договорились? В ответ — Agreed! Это готовая фраза, а не исключение из правила."],
+      [ex("Do you agree with me?"),"agree <b>with</b> — с человеком или его мнением."],
+      [ex("Did they agree to the plan?"),"agree <b>to</b> — на предложение, план, условия."],
+      [ex("Are you OK with that?"),"Тебя это устраивает? — разговорный вариант через be."]])}`},
   {id:"wh",title:"Вопросительные слова с be",body:`
     ${rows(["Слово","Значение","Пример"],[
       ["What","что, какой",ex("What is your name?")],["Where","где; откуда (+ from)",ex("Where are my keys?")],
@@ -885,7 +910,7 @@ CONTENT.m2.rules = function(){
 };
 CONTENT.m1.title = "Вопросы с to be";
 CONTENT.m1.idea = "В вопросе форма be прыгает вперёд — перед подлежащим. Никакого do.";
-const CAT_SEC = {order:"formula",aux_missing:"formula",be_form:"forms",do_be:"traps",be_verb:"traps",wh:"wh",article:"errors",short:"short",other:"formula"};
+const CAT_SEC = {order:"formula",aux_missing:"formula",be_form:"forms",do_be:"traps",be_verb:"shortadj",wh:"wh",article:"errors",short:"short",other:"formula"};
 
 function secHTML(s){ return `<section class="card lesson-sec" data-sec="${s.id}"><h2>${s.title}</h2>${s.body}</section>`; }
 function tocHTML(secs,lesson){
