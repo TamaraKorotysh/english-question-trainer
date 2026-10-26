@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Тренажёр вопросов</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: one centred column (max 780px): sticky top bar → map / lesson / trainer. Colour = grammar role of a word. */
+:root{
+  --bg:#EDF0F6; --card:#FFFFFF; --ink:#172033; --muted:#5B6680; --line:#D6DCE8; --soft:#E5EAF3;
+  --q:#7C3AED; --a:#1D5BD8; --s:#0E8452; --v:#C9580B; --o:#56617A;
+  --ok:#0E7F52; --okbg:#E1F4EA; --warn:#9A5B00; --warnbg:#FFF1D6; --bad:#C2372F; --badbg:#FCE6E3;
+  --accent:#1D5BD8; --accent-ink:#FFFFFF;
+  --f-display:'Unbounded','Onest',system-ui,sans-serif;
+  --f-body:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E121A; --card:#171D29; --ink:#E6EAF3; --muted:#98A2B7; --line:#2A3346; --soft:#20283A;
+  --q:#B691FF; --a:#73A0FF; --s:#45CC8E; --v:#FF9C55; --o:#A6AFC3;
+  --ok:#4CD497; --okbg:#12301F; --warn:#FFC468; --warnbg:#36290F; --bad:#FF7C71; --badbg:#3A1916;
+  --accent:#73A0FF; --accent-ink:#0E121A; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E121A; --card:#171D29; --ink:#E6EAF3; --muted:#98A2B7; --line:#2A3346; --soft:#20283A;
+  --q:#B691FF; --a:#73A0FF; --s:#45CC8E; --v:#FF9C55; --o:#A6AFC3;
+  --ok:#4CD497; --okbg:#12301F; --warn:#FFC468; --warnbg:#36290F; --bad:#FF7C71; --badbg:#3A1916;
+  --accent:#73A0FF; --accent-ink:#0E121A; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--card)}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(1.5rem,4vw,2.1rem)} h2{font-size:1.15rem} h3{font-size:1rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.top-in{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:12px;padding-block:10px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;font-family:var(--f-display);font-weight:700;font-size:.95rem}
+.brand-mark{width:30px;height:30px;border-radius:9px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:1.05rem}
+.top-stats{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stat{padding:4px 10px;border-radius:99px;background:var(--soft);white-space:nowrap}
+.icon-btn{background:var(--soft);border:0;border-radius:99px;padding:4px 10px;font-size:.85rem;color:var(--muted)}
+
+.wrap{max-width:780px;margin:0 auto;padding-block:24px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+.eyebrow{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spacer{flex:1}
+
+.btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 16px;font-weight:600}
+.btn:hover{background:var(--soft)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.pill{display:inline-block;font-size:.75rem;font-weight:600;padding:3px 9px;border-radius:99px;background:var(--soft);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--okbg);color:var(--ok)} .pill.warn{background:var(--warnbg);color:var(--warn)} .pill.acc{background:color-mix(in srgb,var(--accent) 15%,transparent);color:var(--accent)}
+
+/* grammar tokens */
+.tok{display:inline-block;font-family:var(--f-mono);font-weight:500;padding:2px 7px;border-radius:7px;white-space:nowrap}
+.t-q{color:var(--q);background:color-mix(in srgb,var(--q) 13%,transparent)}
+.t-a{color:var(--a);background:color-mix(in srgb,var(--a) 13%,transparent)}
+.t-s{color:var(--s);background:color-mix(in srgb,var(--s) 13%,transparent)}
+.t-v{color:var(--v);background:color-mix(in srgb,var(--v) 14%,transparent)}
+.t-o,.t-t{color:var(--ink);background:var(--soft)}
+.t-p{color:var(--muted);padding:2px 2px}
+.tok.bad{color:var(--bad);background:var(--badbg);text-decoration:line-through}
+.tok.mask{min-width:3.2em;text-align:center}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* map */
+.hero{display:flex;flex-direction:column;gap:10px}
+.hero p{max-width:60ch;color:var(--muted)}
+.level{display:flex;flex-direction:column;gap:10px}
+.level-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.mod{display:flex;flex-direction:column;gap:10px;min-width:0}
+.mod.locked{background:transparent;border-style:dashed}
+.mod.locked .mod-title{color:var(--muted)}
+.mod-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.mod-num{font-family:var(--f-mono);font-size:.8rem;color:var(--muted)}
+.mod-title{font-weight:700;font-size:1.02rem;line-height:1.3}
+.mod-ex{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);overflow-wrap:anywhere}
+.bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--ok);border-radius:99px}
+.resume{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border-color:var(--accent)}
+
+/* lesson */
+.lesson-sec{display:flex;flex-direction:column;gap:14px}
+.big-idea{font-size:1.25rem;font-weight:600;line-height:1.4;max-width:40ch}
+.formula{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.fslot{display:flex;flex-direction:column;align-items:center;gap:4px}
+.fslot .tok{font-size:1.05rem;padding:6px 10px}
+.fslot small{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.plus{align-self:center;color:var(--muted);font-family:var(--f-mono);padding-bottom:18px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;border-radius:99px;padding:6px 12px;font-size:.875rem}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.demo-line{min-height:64px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:1.25rem;padding:14px;border-radius:12px;background:var(--soft)}
+.demo-line .tok{font-size:1.15rem;padding:5px 10px}
+.demo-cap{min-height:3em;max-width:62ch}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td code,.mono{font-family:var(--f-mono);font-size:.9em}
+.errs{display:grid;gap:8px}
+.err{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px 14px;padding:10px 12px;border-radius:10px;background:var(--soft)}
+.err .no{font-family:var(--f-mono);color:var(--bad);text-decoration:line-through}
+.err .yes{font-family:var(--f-mono);color:var(--ok);font-weight:700}
+.err .why{grid-column:1/-1;font-size:.875rem;color:var(--muted)}
+@media (max-width:520px){ .err{grid-template-columns:1fr} }
+.mc{display:flex;flex-direction:column;gap:8px;padding-block:6px}
+.mc+.mc{border-top:1px solid var(--line);padding-top:14px}
+
+/* trainer */
+.strip{display:flex;gap:2px}
+.strip i{flex:1;height:7px;border-radius:2px;background:var(--soft)}
+.strip i.f{background:var(--ok)} .strip i.h{background:var(--warn)} .strip i.s{background:var(--bad)}
+.strip i.cur{background:var(--accent)}
+.train-head{display:flex;flex-direction:column;gap:10px}
+.task{display:flex;flex-direction:column;gap:18px}
+.task-type{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.prompt-ru{font-size:1.5rem;font-weight:600;line-height:1.35}
+.prompt-en{font-family:var(--f-mono);font-size:1.25rem;line-height:1.6;overflow-wrap:anywhere}
+.prompt-en mark{background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--ink);padding:1px 5px;border-radius:5px;border-bottom:2px solid var(--accent)}
+.prompt-en .wrong{color:var(--bad);text-decoration:line-through;text-decoration-thickness:2px}
+.blank{display:inline-block;min-width:3.5em;border-bottom:2px solid var(--accent);text-align:center;color:var(--accent);font-weight:700}
+.about{color:var(--muted)}
+.inp{width:100%;font-family:var(--f-mono);font-size:1.1rem;padding:14px 16px;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.inp:focus{outline:none;border-color:var(--accent)}
+.inp:disabled{opacity:.75}
+.chip-zone{min-height:58px;display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-radius:12px;border:2px dashed var(--line);align-content:flex-start}
+.chip-zone.filled{border-style:solid;border-color:var(--accent)}
+.chip-bank{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font-family:var(--f-mono);font-size:1.05rem;padding:8px 13px;border-radius:10px;border:1px solid var(--line);background:var(--card);box-shadow:0 2px 0 var(--line)}
+.chip:hover{border-color:var(--accent)}
+.chip.ghost{visibility:hidden}
+.chip-zone .chip{background:color-mix(in srgb,var(--accent) 10%,var(--card))}
+.zone-ph{color:var(--muted);font-size:.9rem;align-self:center}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.opt{font-family:var(--f-mono);font-size:1.1rem;padding:14px;border-radius:12px;border:2px solid var(--line);background:var(--card);display:flex;align-items:center;gap:10px;text-align:left}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt kbd{font-family:var(--f-body);font-size:.7rem;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+.opt.wrong{border-color:var(--bad);background:var(--badbg);color:var(--bad);text-decoration:line-through}
+.opt.right{border-color:var(--ok);background:var(--okbg);color:var(--ok);font-weight:700}
+.opt:disabled{cursor:default}
+.fb{border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.fb.warn{background:var(--warnbg);color:var(--ink)}
+.fb.warn .fb-head{color:var(--warn)}
+.fb.ok{background:var(--okbg)}
+.fb.ok .fb-head{color:var(--ok)}
+.fb.shown{background:var(--badbg)}
+.fb.shown .fb-head{color:var(--bad)}
+.fb-head{font-weight:700}
+.ans-line{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.ans-line .tok{font-size:1.1rem;padding:4px 9px}
+.say{border:0;background:var(--card);border-radius:99px;width:34px;height:34px;display:inline-grid;place-items:center;color:var(--accent);flex:none}
+.say:hover{background:var(--soft)}
+.say svg{width:16px;height:16px}
+.alts{display:flex;flex-direction:column;gap:6px;padding-top:6px;border-top:1px solid color-mix(in srgb,var(--ok) 25%,transparent)}
+.alt{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.alt .en{font-family:var(--f-mono);font-weight:500}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.kbd-hint{font-size:.8rem;color:var(--muted)}
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+
+/* results */
+.score{display:flex;gap:12px;flex-wrap:wrap}
+.score>div{flex:1;min-width:130px;padding:14px;border-radius:12px;background:var(--soft)}
+.score b{display:block;font-family:var(--f-display);font-size:1.7rem;font-variant-numeric:tabular-nums}
+.catrow{display:grid;grid-template-columns:minmax(0,190px) minmax(0,1fr) 2.5em;gap:10px;align-items:center;font-size:.9rem}
+.catrow .bar>i{background:var(--warn)}
+.catrow span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
+/* rules: toc, lists, drawer */
+[data-sec]{scroll-margin-top:84px}
+.toc{display:flex;flex-wrap:wrap;gap:6px}
+.toc button{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:5px 11px;font-size:.82rem}
+.toc button:hover{border-color:var(--accent);color:var(--accent)}
+.lesson-sec p{max-width:66ch}
+.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.ex{display:inline-flex;align-items:center;gap:4px}
+.ex .say{width:28px;height:28px;background:transparent}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.col{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:12px;background:var(--soft);min-width:0}
+.col h3{font-family:var(--f-body);font-size:.95rem}
+.pairs{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;font-size:.92rem;align-items:center}
+.pairs .mono{overflow-wrap:anywhere}
+.note{padding:12px 14px;border-radius:10px;background:color-mix(in srgb,var(--accent) 9%,transparent);font-size:.92rem}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);font-weight:600;text-align:left;text-decoration:underline;text-underline-offset:3px}
+.drawer{position:fixed;inset:0;z-index:30;display:flex;justify-content:flex-end;background:rgba(10,14,22,.45)}
+.drawer-panel{width:min(700px,100%);height:100%;overflow-y:auto;background:var(--bg);box-shadow:-10px 0 40px rgba(0,0,0,.25);animation:slidein .25s ease-out}
+.drawer-head{position:sticky;top:0;z-index:2;display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--card);border-bottom:1px solid var(--line);
+  padding-block:calc(10px + env(safe-area-inset-top,0px)) 10px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px))}
+.drawer-body{display:flex;flex-direction:column;gap:16px;padding-block:16px 48px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px))}
+.drawer [data-sec]{scroll-margin-top:72px}
+body.lock{overflow:hidden}
+.tips{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.tip{display:flex;flex-direction:column;gap:6px;padding:14px;border-radius:12px;background:var(--soft);border-top:3px solid var(--accent);min-width:0}
+.tip h3{font-family:var(--f-body);font-size:1rem}
+.tip p{font-size:.92rem}
+.tip-mem{border-top-color:var(--q)} .tip-mem .pill{background:color-mix(in srgb,var(--q) 14%,transparent);color:var(--q)}
+.tip-obs{border-top-color:var(--s)} .tip-obs .pill{background:color-mix(in srgb,var(--s) 14%,transparent);color:var(--s)}
+.tip-hack{border-top-color:var(--v)} .tip-hack .pill{background:color-mix(in srgb,var(--v) 14%,transparent);color:var(--v)}
+.tip .pill{align-self:flex-start}
+@keyframes slidein{from{transform:translateX(40px);opacity:.4}to{transform:none;opacity:1}}
+
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+@media (max-width:520px){ .top-stats .stat.days{display:none} .prompt-ru{font-size:1.3rem} .card{padding:16px} }
+
+/* standalone reset (the artifact viewer adds this itself) */
+html{-webkit-text-size-adjust:100%}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+</head>
+<body>
+<header class="top"><div class="top-in">
+  <button class="brand" data-act="home" aria-label="На карту модулей"><span class="brand-mark">?</span><span>Тренажёр вопросов</span></button>
+  <div class="top-stats">
+    <span class="stat days" id="top-days"></span>
+    <span class="stat" id="top-xp"></span>
+    <button class="icon-btn" id="snd" data-act="sound"></button>
+  </div>
+</div></header>
+<main class="wrap" id="app"></main>
+<div class="drawer" id="drawer" hidden><div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+  <div class="drawer-head"><h2 id="drawer-title">Правило</h2><button class="btn primary" data-act="close-rule" id="drawer-close">Вернуться к заданию</button></div>
+  <div class="drawer-body" id="drawer-body"></div>
+</div></div>
+
+<script>
+/* ============ DATA ============ */
+const LEVELS = {1:"Основа · A1–A2",2:"Специальные вопросы · A2",3:"Живая речь · B1",4:"Продвинутый · B1+ / B2"};
+const MODULES = [
+  {id:"m1",lvl:1,t:"Вопросы с to be",ex:"Are you ready? Where was he?"},
+  {id:"m2",lvl:1,t:"Do / does: Present Simple",ex:"Does she work here? — Yes, she does."},
+  {id:"m3",lvl:1,t:"Did: Past Simple",ex:"Did you call? What did you buy?"},
+  {id:"m4",lvl:1,t:"Модальные: can, will, should…",ex:"Can I sit here? Should we wait?"},
+  {id:"m5",lvl:2,t:"Вопросительные слова",ex:"Why did she leave? Whose bag is it?"},
+  {id:"m6",lvl:2,t:"What time, how much, how often…",ex:"How often do you train?"},
+  {id:"m7",lvl:2,t:"Continuous, Perfect, Future",ex:"Have you ever been…? What are you doing?"},
+  {id:"m8",lvl:2,t:"Вопрос к подлежащему",ex:"Who called you? / Who did you call?"},
+  {id:"m9",lvl:2,t:"Предлог в конце, What … like?",ex:"Who are you talking to? What's it like?"},
+  {id:"m10",lvl:3,t:"Альтернативные вопросы",ex:"Tea or coffee? Did you walk or drive?"},
+  {id:"m11",lvl:3,t:"Отрицательные вопросы",ex:"Don't you like it? Why didn't you come?"},
+  {id:"m12",lvl:3,t:"Разделительные (tags)",ex:"You're new here, aren't you?"},
+  {id:"m13",lvl:3,t:"Косвенные и вежливые",ex:"Could you tell me where the station is?"},
+  {id:"m14",lvl:3,t:"Короткие реакции",ex:"I've been to Japan. — Have you?"},
+  {id:"m15",lvl:4,t:"Пассив в вопросах",ex:"Where was it made? When will it be ready?"},
+  {id:"m16",lvl:4,t:"Сложные случаи",ex:"How long have you been waiting?"}
+];
+const TYPE_LABEL = {build:"Собери вопрос из слов",choose:"Выбери пропущенное слово",tr:"Переведи на английский",fix:"Исправь ошибку",focus:"Задай вопрос к выделенной части",answer:"Придумай вопрос к ответу",react:"Отреагируй на фразу"};
+const SEG_LABEL = {q:"вопрос. слово",a:"помощник",s:"подлежащее",v:"глагол",o:"остальное",t:"остальное"};
+const CAT_LABEL = {order:"Порядок слов",aux_missing:"Пропущен помощник",do_modal:"do вместе с модальным",modal:"Не тот модальный глагол",modal_to:"Лишнее to после модального",do_form:"do, does или did",verb_past:"Прошедшая форма после did",verb_s:"Лишнее -s у глагола",be_form:"Не та форма be",do_be:"do / does вместе с be",be_verb:"be с обычным глаголом",wh:"Вопросительное слово",article:"Артикль a / an",short:"Краткие ответы",other:"Другое"};
+const CAT_TIP = {
+  order:"Повтори формулу: вопросительное слово → форма be → подлежащее. Проговаривай вслух: «Where ARE you», «Why WAS he…».",
+  aux_missing:"Перед подлежащим всегда должен стоять помощник: am / is / are / was / were для be, do / does для обычных глаголов.",
+  do_form:"he / she / it и одно существительное → does; I / you / we / they и несколько → do.",
+  do_modal:"Can, should, will, would сами прыгают вперёд — do с ними не нужен: Can you swim?",
+  modal:"Выбирай модальный глагол по смыслу: можно / умеешь → can, стоит ли → should, будет → will, не хочешь ли → would.",
+  modal_to:"После can, should, must, will глагол идёт без to: Can you help? — не can you to help.",
+  verb_past:"Одно прошлое на вопрос: если есть did, глагол в начальной форме. Did you go? — не went.",
+  verb_s:"Одна s на вопрос: если есть does, глагол голый. Does she work? — не works.",
+  be_form:"Выучи пары: I am · he is · they are, а в прошлом I was · they were. «You was» — самая частая ошибка.",
+  do_be:"Do и be в одном вопросе не встречаются: либо Are you…?, либо Do you…?",
+  be_verb:"Если в вопросе есть обычный глагол (agree, like, want, know), be не подходит: нужен do.",
+  wh:"Сначала реши, о чём вопрос: место → where, время → when, причина → why, возраст → how old.",
+  article:"Перед профессией и предметом в единственном числе ставь a / an: Is he a teacher?",
+  short:"«Да» не сокращаем: Yes, I am. «Нет» можно сокращать: No, I'm not / No, she isn't.",
+  other:"Пройди «Мои ошибки»: задания, где ты ошибся, вернутся ещё раз."
+};
+
+const CONTENT = {};
+CONTENT.m1 = {
+  check: [
+    {q:"___ your brother at school?",opts:["Is","Are","Does"],ans:0,hint:"brother = he → is. School — это место, глагола тут нет, поэтому не does."},
+    {q:"Where ___ you yesterday?",opts:["was","were","did"],ans:1,hint:"you всегда с were — и в единственном, и во множественном числе."},
+    {q:"Как правильно?",opts:["Do you agree?","Are you agree?","You are agree?"],ans:0,hint:"agree — это глагол «соглашаться», а не прилагательное. Ему нужен do."}
+  ],
+  tasks: [
+  {type:"build",f:"a:Are|s:you|o:ready",ru:"Ты готов?",extra:["do","is"],hint:"you → are. Ready — это состояние (прилагательное), поэтому никакого do: Are + you + ready.",alt:[["Are you all set?","разговорно"],["Ready?","коротко"],["Are we good to go?","разговорно: «можно выдвигаться?»"]]},
+  {type:"build",f:"a:Is|s:she|o:your sister",ru:"Она твоя сестра?",extra:["does","are"],hint:"she → is. Is встаёт перед she.",alt:[["Is that your sister?","про человека, на которого показываешь"],["Are you two sisters?","спросить сразу обеих"]]},
+  {type:"choose",q:"___ you tired?",opts:["Are","Do","Is","Am"],ans:0,f:"a:Are|s:you|o:tired",ru:"Ты устал?",cat:"be_form",hint:"you всегда с are. Tired — прилагательное («уставший»), поэтому do не нужен.",why:{1:"Do — помощник для обычных глаголов. Tired — не глагол, а состояние, значит нужен be."},alt:[["Are you feeling tired?","нейтрально"],["You look tired. Long day?","разговорно, с заботой"],["Are you exhausted?","сильнее: «вымотан»"]]},
+  {type:"choose",q:"___ he at work yesterday?",opts:["Was","Were","Did","Is"],ans:0,f:"a:Was|s:he|o:at work|t:yesterday",ru:"Он был на работе вчера?",cat:"be_form",hint:"yesterday → прошлое. he → was. «Быть на работе» — это be, поэтому did не нужен.",alt:[["Did he go to work yesterday?","через глагол go — тогда нужен did"],["Was he in the office yesterday?","нейтрально"]]},
+  {type:"tr",ru:"Где ты?",f:"q:Where|a:are|s:you",acc:["Where are you now"],hint:"Вопросительное слово → форма be → подлежащее: Where + are + you.",alt:[["Where are you now?","нейтрально"],["Where are you at?","разговорно, амер."],["Where have you got to?","брит.: «куда ты пропал?»"]]},
+  {type:"fix",wrong:"Where you are from?",f:"q:Where|a:are|s:you|o:from",ru:"Откуда ты?",acc:["Where do you come from"],hint:"После Where сразу идёт are, потом you. Предлог from остаётся в конце.",alt:[["Where do you come from?","нейтрально, чуть формальнее"],["Where are you originally from?","если человек переехал"],["What country are you from?","уточняет страну"]]},
+  {type:"focus",s:"He is {thirty years old}.",f:"q:How old|a:is|s:he",ru:"Сколько ему лет?",acc:["What age is he"],hint:"Про возраст спрашивают How old + is + he. Не «How many years».",alt:[["What age is he?","брит., разговорно"],["Do you know how old he is?","косвенно: порядок прямой (модуль 13)"]]},
+  {type:"answer",reply:"It's 25 dollars.",about:"Спроси, сколько это стоит.",f:"q:How much|a:is|s:it",ru:"Сколько это стоит?",acc:["How much is this","How much is that","How much does it cost","How much does this cost","What is the price"],hint:"Цена: How much + is + it. Отдельный глагол «стоить» не обязателен — is уже значит «стоит».",alt:[["How much is this?","нейтрально, показывая на вещь"],["What's the price?","нейтрально"],["How much does it cost?","через глагол cost — тогда нужен does"]]},
+  {type:"build",f:"a:Were|s:they|o:at the party",ru:"Они были на вечеринке?",extra:["was","did"],hint:"they → were (прошлое, несколько человек).",alt:[["Did they come to the party?","через глагол come — нужен did"],["Were they there?","коротко"]]},
+  {type:"choose",q:"Are you a student? — Yes, I ___.",opts:["am","'m","are","do"],ans:0,f:"o:Yes,|s:I|a:am",end:".",ru:"Ты студент? — Да.",cat:"short",hint:"Краткий ответ «да» не сокращают: Yes, I am. А «нет» можно: No, I'm not.",why:{1:"Yes, I'm — так не говорят. В конце фразы форма be не сокращается."},alt:[["Yes, I am.","нейтрально"],["Yep, I am.","разговорно"],["That's right.","нейтрально"]]},
+  {type:"tr",ru:"Ты женат? (Ты замужем?)",f:"a:Are|s:you|o:married",acc:[],hint:"«Женат / замужем» = married. Это состояние → Are + you + married.",alt:[["Are you married or single?","альтернативный вопрос"],["Do you have a partner?","нейтрально, шире"],["Is there a special someone?","разговорно, шутливо"]]},
+  {type:"fix",wrong:"Do you are hungry?",f:"a:Are|s:you|o:hungry",ru:"Ты голоден?",acc:[],hint:"Hungry — состояние, а не действие. С be помощник do не нужен: Are you hungry?",alt:[["Are you hungry yet?","«уже проголодался?»"],["Hungry?","коротко"],["Do you want something to eat?","через want — тогда нужен do"]]},
+  {type:"focus",s:"The keys are {on the table}.",f:"q:Where|a:are|s:the keys",ru:"Где ключи?",acc:["Where are my keys"],hint:"Про место — Where. keys — несколько → are.",alt:[["Where did I put the keys?","«куда я положил ключи?»"],["Have you seen the keys?","разговорно"]]},
+  {type:"build",f:"q:What|a:is|s:your name",ru:"Как тебя зовут?",extra:["does","are"],hint:"По-английски не «как», а «что твоё имя»: What + is + your name.",alt:[["What's your name?","нейтрально"],["May I have your name, please?","вежливо"],["Sorry, what was your name again?","вежливо, если забыл"]]},
+  {type:"choose",q:"___ there a bank near here?",opts:["Is","Are","Has","Does"],ans:0,f:"a:Is|s:there|o:a bank|t:near here",ru:"Здесь рядом есть банк?",cat:"be_form",hint:"«Есть ли…» = Is there / Are there. Один банк → Is there.",why:{2:"Has не используется для «есть ли где-то». Нужен оборот there is → Is there…?",3:"Does не работает с there. Оборот there is превращается в Is there…?"},alt:[["Is there a bank nearby?","нейтрально"],["Where's the nearest bank?","прямой вопрос «где»"],["Do you know if there's a bank near here?","вежливо, косвенно"]]},
+  {type:"choose",q:"Where ___ you last night?",opts:["were","was","did","are"],ans:0,f:"q:Where|a:were|s:you|t:last night",ru:"Где ты был вчера вечером?",cat:"be_form",hint:"last night → прошлое. you всегда с were.",why:{1:"you was — частая ошибка. С you всегда were.",2:"Where did you…? нужен глагол (Where did you go?). Здесь глагола нет — значит be."},alt:[["Where did you go last night?","через go — тогда нужен did"],["Where were you all night?","эмоционально"]]},
+  {type:"answer",reply:"I'm from Brazil.",about:"Спроси, откуда он (you).",f:"q:Where|a:are|s:you|o:from",ru:"Откуда ты?",acc:["Where do you come from","What country are you from","Which country are you from"],hint:"Where + are + you + from. Предлог from — в конце.",alt:[["Which country are you from?","уточнение"],["Where's home for you?","разговорно"],["Are you from around here?","общий вопрос: «ты местный?»"]]},
+  {type:"tr",ru:"Это правда?",f:"a:Is|s:it|o:true",acc:["Is that true","Is this true"],hint:"Is + it + true. Слово «это» в таких вопросах — it или that.",alt:[["Really?","разговорно"],["Are you serious?","удивление"],["Is that so?","нейтрально, чуть формально"]]},
+  {type:"build",f:"q:Why|a:are|s:you|o:late",ru:"Почему ты опоздал?",extra:["do","you are"],hint:"Late — «опоздавший», это состояние: Why + are + you + late.",alt:[["How come you're late?","разговорно — порядок слов прямой!"],["What kept you?","разговорно: «что тебя задержало?»"],["Why are you so late?","с упрёком"]]},
+  {type:"fix",wrong:"Are you agree with me?",f:"a:Do|s:you|v:agree|o:with me",ru:"Ты со мной согласен?",acc:["Do you agree"],hint:"Agree — это глагол «соглашаться». Обычному глаголу нужен помощник do, а не be.",alt:[["Do you agree?","коротко"],["Would you agree?","вежливо"],["Are you with me on this?","разговорно"]]},
+  {type:"choose",q:"___ they from Italy?",opts:["Are","Is","Do","Were"],ans:0,f:"a:Are|s:they|o:from Italy",ru:"Они из Италии?",cat:"be_form",hint:"they → are. Речь о настоящем, поэтому не were.",why:{3:"Were — прошлое. Откуда человек — это факт в настоящем: Are they from…?"},alt:[["Are they Italian?","через национальность"],["Do they come from Italy?","через come — нужен do"]]},
+  {type:"focus",s:"The weather was {terrible}.",f:"q:How|a:was|s:the weather",ru:"Какая была погода?",acc:["What was the weather like"],hint:"«Какой был…?» = How + was + … Погода — одна → was.",alt:[["What was the weather like?","очень частый вариант"],["Was the weather good?","общий вопрос"]]},
+  {type:"build",f:"a:Is|s:there|o:any milk|t:in the fridge",ru:"В холодильнике есть молоко?",extra:["are","some"],hint:"«Есть ли…» = Is there…? В вопросах вместо some обычно any.",alt:[["Do we have any milk?","разговорно"],["Is there any milk left?","«осталось ли»"],["Have we got any milk?","брит."]]},
+  {type:"tr",ru:"Сколько тебе лет?",f:"q:How old|a:are|s:you",acc:["What is your age"],hint:"How old + are + you. Не «How many years…».",alt:[["What's your age?","официально, анкета"],["May I ask how old you are?","вежливо, порядок прямой"]]},
+  {type:"choose",q:"Is it cold outside? — No, it ___.",opts:["isn't","doesn't","not","wasn't"],ans:0,f:"o:No,|s:it|a:isn't",end:".",ru:"На улице холодно? — Нет.",cat:"short",hint:"Краткий ответ повторяет помощник из вопроса: Is it…? → No, it isn't.",why:{1:"В вопросе был is, значит и в ответе is: No, it isn't.",3:"Вопрос в настоящем (Is it…?) — и ответ в настоящем."},alt:[["No, it isn't.","нейтрально"],["No, it's not.","тоже верно"],["Not really.","разговорно"]]},
+  {type:"answer",reply:"She was at the dentist.",about:"Спроси, где она была.",f:"q:Where|a:was|s:she",ru:"Где она была?",acc:["Where has she been"],hint:"Прошлое, she → was: Where + was + she.",alt:[["Where has she been?","Present Perfect: «где она пропадала?»"],["Where was she all morning?","с уточнением"]]},
+  {type:"fix",wrong:"Where was you yesterday?",f:"q:Where|a:were|s:you|t:yesterday",ru:"Где ты был вчера?",acc:[],hint:"you всегда с were, даже если это один человек.",alt:[["Where did you go yesterday?","через go — нужен did"],["Where were you all day?","разговорно"]]},
+  {type:"build",f:"q:Who|a:is|s:that man",ru:"Кто тот мужчина?",extra:["does"],hint:"Who + is + that man. Is — перед «тем мужчиной».",alt:[["Who's that guy?","разговорно"],["Do you know that man?","общий вопрос"],["Who is he?","коротко"]]},
+  {type:"focus",s:"My birthday is {in May}.",f:"q:When|a:is|s:your birthday",ru:"Когда у тебя день рождения?",acc:[],hint:"Время → When. Не забудь поменять my на your.",alt:[["When's your birthday?","нейтрально"],["What's your date of birth?","официально"],["When were you born?","через born — тоже be!"]]},
+  {type:"choose",q:"How ___ your holiday?",opts:["was","were","did","is"],ans:0,f:"q:How|a:was|s:your holiday",ru:"Как прошёл твой отпуск?",cat:"be_form",hint:"Отпуск уже прошёл, он один → was.",why:{2:"did нужен только с глаголом: How did your holiday go?"},alt:[["How did your holiday go?","через go — нужен did"],["Did you have a good holiday?","общий вопрос"],["How was the trip?","разговорно"]]},
+  {type:"tr",ru:"Твои родители дома?",f:"a:Are|s:your parents|o:at home",acc:["Are your parents home"],hint:"Родители — несколько → are. «Дома» = at home.",alt:[["Is anyone home?","«есть кто дома?»"],["Are your mum and dad in?","брит., разговорно"]]},
+  {type:"fix",wrong:"Is he teacher?",f:"a:Is|s:he|o:a teacher",ru:"Он учитель?",acc:[],hint:"Перед профессией в единственном числе нужен артикль: a teacher.",alt:[["Does he work as a teacher?","через work — нужен does"],["What does he do?","спросить профессию открыто"]]},
+  {type:"build",f:"q:What time|a:is|s:it",ru:"Который час?",extra:["does","are"],hint:"What time + is + it. «Время» — это it.",alt:[["What's the time?","брит."],["Do you have the time?","вежливо, у незнакомца"],["Have you got the time?","брит., вежливо"]]},
+  {type:"choose",q:"___ the shops open on Sunday?",opts:["Are","Is","Do","Does"],ans:0,f:"a:Are|s:the shops|o:open|t:on Sunday",ru:"Магазины открыты в воскресенье?",cat:"be_form",hint:"Здесь open — «открытый» (состояние), магазинов много → Are.",why:{2:"Do the shops open…? — тоже бывает, но тогда open — глагол «открываться». В этом задании open — «открыты», значит be."},alt:[["Do the shops open on Sunday?","open как глагол «открываются» — нужен do"],["Are the shops open on Sundays?","«по воскресеньям вообще»"]]},
+  {type:"answer",reply:"There are about twenty people.",about:"Спроси, сколько там людей.",f:"q:How many people|a:are|s:there",ru:"Сколько там людей?",acc:["How many people are there here","How many are there"],hint:"How many people + are + there. Людей много → are.",alt:[["How many people came?","через came"],["How big is the group?","разговорно"]]},
+  {type:"focus",s:"They were angry {because we were late}.",f:"q:Why|a:were|s:they|o:angry",ru:"Почему они злились?",acc:["Why were they so angry"],hint:"Причина → Why. they → were.",alt:[["What were they angry about?","предлог в конце (модуль 9)"],["Why were they so upset?","синоним"]]},
+  {type:"tr",ru:"Ты занят?",f:"a:Are|s:you|o:busy",acc:["Are you busy now","Are you busy right now"],hint:"Busy — состояние: Are + you + busy.",alt:[["Are you busy right now?","уточнение"],["Have you got a minute?","вежливо: «есть минутка?»"],["Is this a good time?","вежливо, по телефону"]]},
+  {type:"choose",q:"___ I late?",opts:["Am","Is","Are","Do"],ans:0,f:"a:Am|s:I|o:late",ru:"Я опоздал?",cat:"be_form",hint:"I → am. Это единственная пара: I + am.",alt:[["Am I too late?","«не слишком ли поздно?»"],["Did I miss anything?","разговорно"]]},
+  {type:"fix",wrong:"How old your son is?",f:"q:How old|a:is|s:your son",ru:"Сколько лет твоему сыну?",acc:[],hint:"После How old сразу is, потом your son.",alt:[["What age is your son?","брит."],["How old's your boy?","разговорно"]]},
+  {type:"build",f:"a:Was|s:the film|o:good",ru:"Фильм был хороший?",extra:["did","were"],hint:"Фильм один, прошлое → was.",alt:[["How was the film?","специальный вопрос"],["Did you like the film?","через like — нужен did"],["Was the movie any good?","амер., разговорно"]]},
+  {type:"choose",q:"Were you at home? — Yes, I ___.",opts:["was","were","did","am"],ans:0,f:"o:Yes,|s:I|a:was",end:".",ru:"Ты был дома? — Да.",cat:"short",hint:"Спросили про you (were), а отвечаешь про себя: I → was.",why:{1:"В вопросе were, потому что you. А в ответе подлежащее I → was."},alt:[["Yes, I was.","нейтрально"],["Yeah, all evening.","разговорно"]]},
+  {type:"answer",reply:"It's my brother's car.",about:"Спроси, чья это машина.",f:"q:Whose car|a:is|s:it",ru:"Чья это машина?",acc:["Whose car is this","Whose car is that","Whose is this car","Whose is the car","Whose is it"],hint:"Чей? = Whose. Whose car + is + it / this.",alt:[["Whose is this car?","тоже верно"],["Who does this car belong to?","через belong — нужен does"]]},
+  {type:"tr",ru:"Что случилось? (Что не так?)",f:"s:What|a:is|o:wrong",acc:["What is the matter","What is up","What is wrong with you"],hint:"«Что не так?» = What + is + wrong. Здесь what — само подлежащее.",alt:[["What's the matter?","нейтрально"],["What's up?","разговорно"],["Is everything OK?","мягко, общий вопрос"]]},
+  {type:"fix",wrong:"Is there many people?",f:"a:Are|s:there|o:many people",ru:"Там много людей?",acc:["Are there a lot of people","Are there lots of people"],hint:"После there форма be зависит от того, что идёт дальше: много людей → Are there.",alt:[["Is it crowded?","разговорно: «там людно?»"],["Are there a lot of people?","нейтрально"]]},
+  {type:"focus",s:"The museum is {near the station}.",f:"q:Where|a:is|s:the museum",ru:"Где музей?",acc:[],hint:"Место → Where. Музей один → is.",alt:[["How do I get to the museum?","через get — нужен do"],["Could you tell me where the museum is?","вежливо, косвенно (модуль 13)"]]},
+  {type:"choose",q:"Why ___ the door open?",opts:["is","does","are","has"],ans:0,f:"q:Why|a:is|s:the door|o:open",ru:"Почему дверь открыта?",cat:"be_form",hint:"Open здесь — «открытая» (состояние). Дверь одна → is.",alt:[["Who left the door open?","вопрос к подлежащему (модуль 8)"],["Why is the door open again?","с раздражением"]]},
+  {type:"build",f:"q:Where|a:were|s:you|v:born",ru:"Где ты родился?",extra:["did","was"],hint:"«Родиться» по-английски — be born. Поэтому were, а не did: Where were you born?",alt:[["Where are you from originally?","разговорно"],["What's your place of birth?","официально, анкета"]]},
+  {type:"tr",ru:"Он был на встрече?",f:"a:Was|s:he|o:at the meeting",acc:["Was he in the meeting"],hint:"Прошлое, he → was. «На встрече» = at the meeting.",alt:[["Did he come to the meeting?","через come — нужен did"],["Did he make it to the meeting?","разговорно: «успел ли»"]]},
+  {type:"answer",reply:"Yes, we are. We love it here.",about:"Спроси, счастливы ли они здесь (you).",f:"a:Are|s:you|o:happy|t:here",ru:"Вы здесь счастливы?",acc:[],hint:"Ответ «Yes, we are» подсказывает помощник: Are + you + happy.",alt:[["Do you like it here?","через like — нужен do"],["How do you like it here?","разговорно"]]},
+  {type:"fix",wrong:"Was they at home?",f:"a:Were|s:they|o:at home",ru:"Они были дома?",acc:["Were they home"],hint:"they → were, а не was.",alt:[["Were they in?","брит., разговорно"],["Was anyone at home?","«кто-нибудь был дома?»"]]}
+  ]
+};
+CONTENT.m2 = {
+  check: [
+    {q:"___ your sister speak English?",opts:["Does","Do","Is"],ans:0,hint:"sister = she → does. Speak — обычный глагол, поэтому не is."},
+    {q:"Where do you ___?",opts:["live","lives","living"],ans:0,hint:"После do / does глагол всегда в начальной форме: live."},
+    {q:"Как правильно?",opts:["What does it mean?","What means it?","What it means?"],ans:0,hint:"mean — глагол. Нужен помощник does, а сам глагол — в конце и без -s."}
+  ],
+  tasks: [
+  {type:"build",f:"a:Do|s:you|v:like|o:coffee",ru:"Ты любишь кофе?",extra:["are","does"],hint:"like — обычный глагол, прыгать он не умеет. Нужен помощник Do перед you.",alt:[["Are you a coffee person?","разговорно: «ты кофеман?»"],["Do you drink coffee?","«пьёшь ли вообще»"],["Would you like a coffee?","это предложение: «хочешь кофе?» сейчас"]]},
+  {type:"build",f:"a:Does|s:she|v:work|o:here",ru:"Она здесь работает?",extra:["works","do"],hint:"she → does. После does глагол без -s: work.",alt:[["Is she working here now?","временно, сейчас (модуль 7)"],["Does she work for this company?","уточнение"]]},
+  {type:"choose",q:"___ your brother play football?",opts:["Does","Do","Is","Are"],ans:0,f:"a:Does|s:your brother|v:play|o:football",ru:"Твой брат играет в футбол?",cat:"do_form",hint:"brother = he → does.",why:{1:"Do — для I / you / we / they. Брат — он, значит does.",2:"play — обычный глагол, be здесь не работает."},alt:[["Is your brother into football?","разговорно: «увлекается»"],["Does your brother like football?","«любит» вместо «играет»"]]},
+  {type:"choose",q:"Does he ___ in London?",opts:["live","lives","living","lived"],ans:0,f:"a:Does|s:he|v:live|o:in London",ru:"Он живёт в Лондоне?",cat:"verb_s",hint:"После does глагол всегда в начальной форме: live. Окончание -s уже «забрал» does.",why:{1:"lives — ошибка: -s уже есть в does. Одна s на вопрос.",3:"lived — прошлое. В прошлом был бы did, а не does."},alt:[["Is he based in London?","деловой стиль"],["Does he live in London or near it?","уточнение"]]},
+  {type:"tr",ru:"Где ты живёшь?",f:"q:Where|a:do|s:you|v:live",acc:[],hint:"Where + do + you + live.",alt:[["Whereabouts do you live?","брит., разговорно: «в каком районе?»"],["Where's home for you?","разговорно"],["Where are you based?","деловой стиль"]]},
+  {type:"fix",wrong:"You speak English?",f:"a:Do|s:you|v:speak|o:English",ru:"Ты говоришь по-английски?",acc:[],hint:"Без Do это звучит как удивление («Ты что, говоришь по-английски?!»). Обычный вопрос начинается с Do.",alt:[["Can you speak English?","через can: «умеешь ли»"],["Do you speak any English?","«хоть немного»"]]},
+  {type:"focus",s:"She gets up {at 7 o'clock}.",f:"q:What time|a:does|s:she|v:get up",ru:"Во сколько она встаёт?",acc:["When does she get up"],hint:"Время → What time или When. she → does, а gets → get.",alt:[["When does she usually get up?","с usually"],["How early does she get up?","«насколько рано»"]]},
+  {type:"answer",reply:"I work in a hospital. I'm a nurse.",about:"Спроси, кем он работает (you).",f:"q:What|a:do|s:you|v:do",ru:"Кем ты работаешь?",acc:["Where do you work","What is your job","What do you do for a living","What do you work as"],hint:"Кем работаешь? = What do you do? Первый do — помощник, второй — глагол «делать».",alt:[["What do you do for a living?","нейтрально"],["What's your job?","через be"],["What line of work are you in?","формально"]]},
+  {type:"build",f:"q:How much|a:does|s:it|v:cost",ru:"Сколько это стоит?",extra:["costs","is"],hint:"it → does, а costs → cost.",alt:[["How much is it?","через be — проще"],["What does it cost?","тоже верно"],["What's the price?","нейтрально"]]},
+  {type:"choose",q:"Do you have a car? — Yes, I ___.",opts:["do","have","am","does"],ans:0,f:"o:Yes,|s:I|a:do",end:".",ru:"У тебя есть машина? — Да.",cat:"short",hint:"Спросили с do — отвечаем с do: Yes, I do.",why:{1:"Yes, I have — так отвечают на Have you got…? На Do you have…? → Yes, I do.",2:"am — ответ на вопрос с be. Тут спросили с do."},alt:[["Yes, I do.","нейтрально"],["Yeah, I've got an old Ford.","разговорно, с деталями"]]},
+  {type:"tr",ru:"Что это значит?",f:"q:What|a:does|s:it|v:mean",acc:["What does this mean","What does that mean"],hint:"Mean — глагол «значить». it → does + mean.",alt:[["What does that mean?","про то, что сказали"],["What do you mean?","«что ты имеешь в виду?»"],["Meaning?","разговорно, коротко"]]},
+  {type:"fix",wrong:"Does she likes chocolate?",f:"a:Does|s:she|v:like|o:chocolate",ru:"Она любит шоколад?",acc:[],hint:"После does глагол без -s: like.",alt:[["Is she a chocolate lover?","через be"],["Is she into chocolate?","разговорно"]]},
+  {type:"focus",s:"They go to the gym {three times a week}.",f:"q:How often|a:do|s:they|v:go|o:to the gym",ru:"Как часто они ходят в спортзал?",acc:["How often do they go"],hint:"Частота → How often + do + they + go.",alt:[["How many times a week do they go to the gym?","точнее"],["Do they go to the gym often?","общий вопрос"]]},
+  {type:"build",f:"q:What time|a:does|s:the shop|v:close",ru:"Во сколько закрывается магазин?",extra:["closes","is"],hint:"Магазин один → does, closes → close.",alt:[["When does the shop close?","нейтрально"],["How late is the shop open?","через be: «до скольки открыт»"],["What are your opening hours?","спросить у продавца"]]},
+  {type:"choose",q:"Where ___ your parents live?",opts:["do","does","are","is"],ans:0,f:"q:Where|a:do|s:your parents|v:live",ru:"Где живут твои родители?",cat:"do_form",hint:"parents — несколько → do.",why:{1:"Родителей двое → они → do. Does — только для одного (he / she / it)."},alt:[["Where are your parents based?","деловой стиль"],["Do your parents live nearby?","общий вопрос"]]},
+  {type:"choose",q:"___ you agree with me?",opts:["Do","Are","Does","Is"],ans:0,f:"a:Do|s:you|v:agree|o:with me",ru:"Ты со мной согласен?",cat:"be_verb",hint:"agree — глагол «соглашаться», поэтому do.",why:{1:"Are you agree — самая частая ошибка русскоязычных. agree — глагол, ему нужен do."},alt:[["Would you agree?","вежливо"],["Are you with me?","разговорно"],["Don't you agree?","с ожиданием «да» (модуль 11)"]]},
+  {type:"answer",reply:"No, she doesn't. She drinks tea.",about:"Спроси, пьёт ли она кофе.",f:"a:Does|s:she|v:drink|o:coffee",ru:"Она пьёт кофе?",acc:["Does she like coffee"],hint:"Ответ «she doesn't» подсказывает помощник: Does + she + drink…",alt:[["Is she a coffee drinker?","через be"],["Does she like coffee?","через like"]]},
+  {type:"tr",ru:"Ты меня понимаешь?",f:"a:Do|s:you|v:understand|o:me",acc:["Do you understand"],hint:"Understand — глагол → Do you understand me?",alt:[["Does that make sense?","вежливо, мягче"],["Are you with me?","разговорно"],["Do you see what I mean?","«понимаешь, о чём я?»"]]},
+  {type:"build",f:"q:Why|a:do|s:you|v:want|o:to leave",ru:"Почему ты хочешь уйти?",extra:["are","wants"],hint:"want — глагол → Why + do + you + want.",alt:[["Why are you leaving?","Continuous: уже решил"],["What makes you want to leave?","мягче, вежливо"]]},
+  {type:"fix",wrong:"Where you work?",f:"q:Where|a:do|s:you|v:work",ru:"Где ты работаешь?",acc:[],hint:"После Where нужен помощник do.",alt:[["Who do you work for?","«на кого работаешь» (модуль 9)"],["What company are you with?","деловой стиль"]]},
+  {type:"choose",q:"What ___ he usually have for breakfast?",opts:["does","do","is","has"],ans:0,f:"q:What|a:does|s:he|t:usually|v:have|o:for breakfast",ru:"Что он обычно ест на завтрак?",cat:"do_form",hint:"he → does. Have здесь — «есть (еду)», это глагол, ему нужен does.",why:{3:"has здесь не помощник. Have for breakfast — глагол «есть», и ему нужен does."},alt:[["What does he normally eat in the morning?","нейтрально"],["What's his usual breakfast?","через be"]]},
+  {type:"focus",s:"My sister lives {in Kyiv}.",f:"q:Where|a:does|s:your sister|v:live",ru:"Где живёт твоя сестра?",acc:[],hint:"Место → Where. sister → does, lives → live. И my → your.",alt:[["Which city does your sister live in?","предлог в конце"],["Is your sister in Kyiv?","через be"]]},
+  {type:"build",f:"a:Do|s:you|v:have|o:any brothers",ru:"У тебя есть братья?",extra:["got","does"],hint:"Have — «иметь», обычный глагол → Do you have…? В вопросе вместо some — any.",alt:[["Have you got any brothers?","брит."],["Do you have any brothers or sisters?","полнее"],["Are you an only child?","через be: «ты единственный ребёнок?»"]]},
+  {type:"tr",ru:"Сколько стоит билет?",f:"q:How much|a:does|s:the ticket|v:cost",acc:["How much is the ticket","How much does a ticket cost","How much is a ticket"],hint:"How much + does + the ticket + cost.",alt:[["How much is a ticket?","через be — проще"],["What's the fare?","про проезд в транспорте"]]},
+  {type:"choose",q:"Does your dog bite? — No, it ___.",opts:["doesn't","don't","isn't","not"],ans:0,f:"o:No,|s:it|a:doesn't",end:".",ru:"Твоя собака кусается? — Нет.",cat:"short",hint:"Спросили с does — отвечаем doesn't. Собака → it.",why:{1:"it → doesn't. Don't — для I / you / we / they.",2:"isn't — ответ на вопрос с be. Тут спросили с does."},alt:[["No, it doesn't.","нейтрально"],["No, he's really friendly.","о своей собаке часто говорят he / she"]]},
+  {type:"answer",reply:"I usually go by bus.",about:"Спроси, как он добирается до работы (you).",f:"q:How|a:do|s:you|v:get|o:to work",ru:"Как ты добираешься до работы?",acc:["How do you go to work","How do you usually get to work","How do you travel to work","How do you usually go to work"],hint:"How + do + you + get to work. Get to — «добираться».",alt:[["How do you commute?","нейтрально"],["What's your commute like?","разговорно"]]},
+  {type:"fix",wrong:"What means this word?",f:"q:What|a:does|s:this word|v:mean",ru:"Что значит это слово?",acc:[],hint:"mean — глагол. Нужен does, а mean уходит в конец.",alt:[["What's the meaning of this word?","через be"],["What does this word mean in Russian?","«как это по-русски?»"]]},
+  {type:"build",f:"a:Does|s:it|v:hurt",ru:"Больно? (Болит?)",extra:["is","hurts"],hint:"«Болит?» = Does it hurt? Hurt — глагол «болеть».",alt:[["Is it painful?","через be"],["Where does it hurt?","у врача: «где болит?»"]]},
+  {type:"focus",s:"He works {as a teacher}.",f:"q:What|a:does|s:he|v:do",ru:"Кем он работает?",acc:["What is his job","What does he work as","What does he do for a living"],hint:"Профессия: What does he do?",alt:[["What does he do for a living?","нейтрально"],["What's his job?","через be"]]},
+  {type:"choose",q:"How ___ you spell your name?",opts:["do","are","does","is"],ans:0,f:"q:How|a:do|s:you|v:spell|o:your name",ru:"Как пишется твоё имя?",cat:"do_form",hint:"spell — глагол «писать по буквам» → do.",alt:[["Could you spell your name, please?","вежливо"],["How is your name spelled?","пассив (модуль 15)"]]},
+  {type:"tr",ru:"Тебе нравится твоя работа?",f:"a:Do|s:you|v:like|o:your job",acc:["Do you enjoy your job","Do you like your work","Do you enjoy your work"],hint:"«Нравится» = like (глагол) → Do you like…? Слово «тебе» не переводится.",alt:[["Do you enjoy your job?","нейтрально"],["How do you like your job?","«как тебе работа?»"],["Are you happy at work?","через be"]]},
+  {type:"fix",wrong:"Do she speak French?",f:"a:Does|s:she|v:speak|o:French",ru:"Она говорит по-французски?",acc:[],hint:"she → does.",alt:[["Can she speak French?","«умеет ли»"],["Is her French good?","через be"]]},
+  {type:"build",f:"q:Which team|a:do|s:you|v:support",ru:"За какую команду ты болеешь?",extra:["are","does"],hint:"Which team + do + you + support. «Болеть за» = support.",alt:[["Who do you support?","брит., про футбол"],["Which team are you a fan of?","через be"]]},
+  {type:"choose",q:"___ your parents know about it?",opts:["Do","Does","Are","Is"],ans:0,f:"a:Do|s:your parents|v:know|o:about it",ru:"Твои родители знают об этом?",cat:"do_form",hint:"parents — они → do. know — глагол.",why:{1:"Родители — несколько человек → do."},alt:[["Have you told your parents?","Present Perfect: «ты сказал им?»"],["Are your parents aware of it?","через be, формальнее"]]},
+  {type:"answer",reply:"It starts at eight.",about:"Спроси, когда начинается фильм.",f:"q:When|a:does|s:the film|v:start",ru:"Когда начинается фильм?",acc:["What time does the film start","When does the movie start","What time does the movie start","When does it start","What time does it start"],hint:"Расписание → Present Simple: When + does + the film + start.",alt:[["What time's the film?","разговорно"],["When does the movie begin?","амер."]]},
+  {type:"focus",s:"She calls her mum {every day}.",f:"q:How often|a:does|s:she|v:call|o:her mum",ru:"Как часто она звонит маме?",acc:["How often does she call her mother","How often does she call"],hint:"Частота → How often + does + she + call.",alt:[["Does she call her mum every day?","общий вопрос"],["How often does she phone her mum?","брит."]]},
+  {type:"tr",ru:"Ты мне веришь?",f:"a:Do|s:you|v:believe|o:me",acc:[],hint:"believe — глагол → Do you believe me?",alt:[["Do you trust me?","«доверяешь?»"],["You believe me, don't you?","разделительный вопрос (модуль 12)"]]},
+  {type:"choose",q:"Does she ___ a car?",opts:["have","has","having","got"],ans:0,f:"a:Does|s:she|v:have|o:a car",ru:"У неё есть машина?",cat:"verb_s",hint:"После does — have, а не has.",why:{1:"has — это have + s. После does s не нужна → have.",3:"got работает только с has: Has she got a car?"},alt:[["Has she got a car?","брит."],["Does she drive?","«водит ли»"]]},
+  {type:"fix",wrong:"How much it costs?",f:"q:How much|a:does|s:it|v:cost",ru:"Сколько это стоит?",acc:[],hint:"Нужен does перед it, а costs → cost.",alt:[["How much is it?","проще, через be"],["What does it cost?","тоже верно"]]},
+  {type:"build",f:"q:What|a:do|s:you|v:think",ru:"Как ты думаешь? (Что думаешь?)",extra:["are","does"],hint:"«Как думаешь?» по-английски — What, а не How: What do you think?",alt:[["What's your opinion?","через be, формальнее"],["What do you reckon?","брит., разговорно"],["Any thoughts?","коротко, в переписке"]]},
+  {type:"choose",q:"Do you like jazz? — No, I ___.",opts:["don't","doesn't","am not","not like"],ans:0,f:"o:No,|s:I|a:don't",end:".",ru:"Ты любишь джаз? — Нет.",cat:"short",hint:"I → don't.",why:{1:"I → don't. Doesn't — только для he / she / it.",2:"am not — ответ на вопрос с be. Тут спросили с do → I don't.",3:"Краткий ответ повторяет помощник: No, I don't."},alt:[["No, I don't.","нейтрально"],["Not really.","мягче"],["No, not my thing.","разговорно"]]},
+  {type:"answer",reply:"Yes, he does. He's got three cats.",about:"Спроси, есть ли у него домашние животные (pets).",f:"a:Does|s:he|v:have|o:any pets",ru:"У него есть домашние животные?",acc:["Does he have pets","Does he have a pet","Has he got any pets","Has he got pets"],hint:"«Yes, he does» — значит, вопрос с does: Does he have any pets?",alt:[["Has he got any pets?","брит."],["Is he an animal lover?","через be"]]},
+  {type:"tr",ru:"Во сколько ты обычно встаёшь?",f:"q:What time|a:do|s:you|t:usually|v:get up",acc:["When do you usually get up","When do you get up"],hint:"What time + do + you + usually + get up. Usually — перед глаголом.",alt:[["When do you normally wake up?","wake up — «проснуться»"],["Are you an early riser?","через be: «ты жаворонок?»"]]},
+  {type:"fix",wrong:"Are you like this song?",f:"a:Do|s:you|v:like|o:this song",ru:"Тебе нравится эта песня?",acc:[],hint:"like — глагол, be не нужен.",alt:[["How do you like this song?","«как тебе песня?»"],["Is this song your thing?","разговорно"]]},
+  {type:"focus",s:"He drinks {green tea}.",f:"q:What|a:does|s:he|v:drink",ru:"Что он пьёт?",acc:["What kind of tea does he drink","What tea does he drink"],hint:"Что? → What + does + he + drink.",alt:[["What kind of tea does he drink?","уточнение"],["What's his favourite drink?","через be"]]},
+  {type:"choose",q:"Why ___ she look so sad?",opts:["does","is","do","has"],ans:0,f:"q:Why|a:does|s:she|v:look|o:so sad",ru:"Почему она выглядит такой грустной?",cat:"be_verb",hint:"look — глагол «выглядеть» → does.",why:{1:"Why is she so sad? — верно, но тогда без look. С глаголом look нужен does."},alt:[["Why is she so sad?","через be, без look"],["What's wrong with her?","разговорно"]]},
+  {type:"build",f:"a:Does|s:this bus|v:go|o:to the airport",ru:"Этот автобус идёт в аэропорт?",extra:["goes","is"],hint:"Автобус один → does, goes → go.",alt:[["Is this the bus for the airport?","через be"],["Which bus goes to the airport?","вопрос к подлежащему (модуль 8)"]]},
+  {type:"tr",ru:"Как часто ты ходишь в кино?",f:"q:How often|a:do|s:you|v:go|o:to the cinema",acc:["How often do you go to the movies"],hint:"How often + do + you + go to the cinema.",alt:[["How often do you go to the movies?","амер."],["Do you go to the cinema much?","разговорно"]]},
+  {type:"answer",reply:"It means «very tired».",about:"Спроси, что значит слово exhausted.",f:"q:What|a:does|s:exhausted|v:mean",ru:"Что значит exhausted?",acc:["What does the word exhausted mean","What does exhausted mean in Russian"],hint:"What + does + exhausted + mean.",alt:[["What's the meaning of exhausted?","через be"],["What's exhausted in Russian?","«как это по-русски?»"]]},
+  {type:"fix",wrong:"Does your parents live here?",f:"a:Do|s:your parents|v:live|o:here",ru:"Твои родители живут здесь?",acc:[],hint:"parents — несколько → do.",alt:[["Are your parents from here?","через be"],["Do your parents live nearby?","«поблизости»"]]}
+  ]
+};
+const TASKS = {};
+
+/* lesson demos for module 1 */
+const DEMOS = [
+  {name:"Да / нет", frames:[
+    {t:[["she","She","s"],["is","is","a"],["home","at home","o"],["p",".","p"]], c:"Утверждение: сначала подлежащее <b>she</b>, потом <b>is</b>."},
+    {t:[["is","Is","a"],["she","she","s"],["home","at home","o"],["p","?","p"]], c:"<b>Is</b> прыгает вперёд, перед подлежащим. Точка становится вопросительным знаком. Готово: <i>Is she at home?</i>"}]},
+  {name:"С вопросительным словом", frames:[
+    {t:[["they","They","s"],["were","were","a"],["paris","in Paris","o"],["p",".","p"]], c:"Хотим спросить, <b>где</b> они были."},
+    {t:[["wh","Where","q"],["they","they","s"],["were","were","a"],["p","?","p"]], c:"Место (in Paris) заменяем словом <b>Where</b> и ставим его в начало. Но <i>Where they were?</i> — ещё не вопрос."},
+    {t:[["wh","Where","q"],["were","were","a"],["they","they","s"],["p","?","p"]], c:"<b>were</b> прыгает перед подлежащим: <i>Where were they?</i>"}]},
+  {name:"There is", frames:[
+    {t:[["there","There","s"],["is","is","a"],["bank","a bank","o"],["near","near here","o"],["p",".","p"]], c:"Оборот <b>there is / there are</b> — «есть, находится»."},
+    {t:[["is","Is","a"],["there","there","s"],["bank","a bank","o"],["near","near here","o"],["p","?","p"]], c:"Правило то же: <b>is</b> прыгает вперёд. <i>Is there a bank near here?</i> Если предметов много — <i>Are there…?</i>"}]},
+  {name:"Ловушка", frames:[
+    {t:[["you","You","s"],["agree","agree","v"],["p",".","p"]], c:"«Ты согласен» по-русски звучит как «ты готов». Но <b>agree</b> — это глагол «соглашаться», а не прилагательное."},
+    {t:[["are","Are","a","bad"],["you","you","s"],["agree","agree","v"],["p","?","p"]], c:"<i>Are you agree?</i> — ошибка. Be не ставят перед обычным глаголом."},
+    {t:[["do","Do","a"],["you","you","s"],["agree","agree","v"],["p","?","p"]], c:"Обычному глаголу нужен помощник <b>do</b>: <i>Do you agree?</i> Так же с like, want, know. Подробно — в модуле 2."}]}
+];
+
+/* ============ STORAGE ============ */
+const KEY = "qtrainer.v1";
+function defState(){ return {xp:0,days:[],mods:{},bank:{},sess:null,last:null,sound:true}; }
+function load(){ try{ const r=localStorage.getItem(KEY); if(r) return Object.assign(defState(),JSON.parse(r)); }catch(e){} return defState(); }
+let S = load();
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function modState(id){ return S.mods[id] || (S.mods[id]={lesson:false,best:null,runs:0}); }
+function dayKey(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function touchDay(){ const k=dayKey(new Date()); if(!S.days.includes(k)){ S.days.push(k); S.days=S.days.slice(-90); } }
+function streak(){ let n=0; const d=new Date(); if(!S.days.includes(dayKey(d))) d.setDate(d.getDate()-1); while(S.days.includes(dayKey(d))){ n++; d.setDate(d.getDate()-1); } return n; }
+
+/* ============ HELPERS ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
+function plural(n,a,b,c){ const m10=n%10,m100=n%100; return m10===1&&m100!==11?a:(m10>=2&&m10<=4&&(m100<10||m100>=20)?b:c); }
+function parseF(f){ return f.split("|").map(p=>{ const i=p.indexOf(":"); return {tag:p.slice(0,i),text:p.slice(i+1)}; }); }
+function mainText(t){ return cap(parseF(t.f).map(s=>s.text).join(" "))+(t.end||"?"); }
+function tokensHTML(t, cls=""){ return parseF(t.f).map((s,i)=>`<span class="tok t-${s.tag} ${cls}">${esc(i===0?cap(s.text):s.text)}</span>`).join(" ")+`<span class="tok t-p">${t.end||"?"}</span>`; }
+const SAY_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>`;
+function sayBtn(text){ return HAS_TTS ? `<button class="say" data-act="say" data-say="${esc(text)}" aria-label="Послушать: ${esc(text)}" title="Послушать">${SAY_ICON}</button>` : ""; }
+
+const CONTR = [[/\bcan't\b/g,"can not"],[/\bcannot\b/g,"can not"],[/\bwon't\b/g,"will not"],[/\b(\w+)n't\b/g,"$1 not"],[/\bi'm\b/g,"i am"],[/'re\b/g," are"],[/'s\b/g," is"],[/'ve\b/g," have"],[/'ll\b/g," will"],[/'d\b/g," would"]];
+function norm(s){ s=String(s).toLowerCase().replace(/[’‘`´]/g,"'").replace(/[?!.,;:"«»—–]/g," "); for(const [r,x] of CONTR) s=s.replace(r,x); return s.replace(/\s+/g," ").trim(); }
+function lev(a,b){ const m=a.length,n=b.length; const d=Array.from({length:m+1},(_,i)=>[i]); for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+const BE=["am","is","are","was","were"], DO=["do","does","did"];
+const AUXW=[...BE,...DO,"can","could","will","would","should","must","have","has","had","shall","may","might"];
+const WH=["what","where","when","why","who","whom","whose","which","how"];
+const PROTECT=new Set([...AUXW,"to",...WH,"a","an","the","there","not","i","you","he","she","it","we","they"]);
+
+function accepted(t){
+  const segs=parseF(t.f), list=[mainText(t)];
+  if(segs.some(s=>s.tag==="t")) list.push(segs.filter(s=>s.tag!=="t").map(s=>s.text).join(" "));
+  // "Don't you…?" is also right as "Do you not…?"
+  const ai=segs.findIndex(s=>s.tag==="a");
+  if(!t.end && ai>-1 && segs[ai+1] && segs[ai+1].tag==="s" && /n't$/i.test(segs[ai].text) && !(/^aren't$/i.test(segs[ai].text) && segs[ai+1].text==="I")){
+    const a=segs[ai].text, full={"can't":"can","won't":"will","shan't":"shall"}[a.toLowerCase()]||a.replace(/n't$/i,"");
+    list.push(segs.map((s,i)=>i===ai?full:(i===ai+1?s.text+" not":s.text)).join(" "));
+  }
+  return {list:list.concat(t.acc||[]), auto:list.length};
+}
+function match(t,raw){
+  const u=norm(raw), A=accepted(t);
+  for(let i=0;i<A.list.length;i++) if(norm(A.list[i])===u) return {ok:true,alt:i>=A.auto};
+  const ut=u.split(" ");
+  for(const a of A.list){ const at=norm(a).split(" "); if(at.length!==ut.length) continue;
+    const diff=at.map((w,j)=>w!==ut[j]?j:-1).filter(j=>j>=0);
+    if(diff.length===1){ const w=at[diff[0]], x=ut[diff[0]];
+      const vw=norm(parseF(t.f).filter(s=>s.tag==="v").map(s=>s.text).join(" ")).split(" ");
+      if(!PROTECT.has(w)&&!PROTECT.has(x)&&!inflected(w,x)&&!vw.includes(w)&&w.length>=4&&lev(w,x)<=(w.length>6?2:1)) return {ok:true,typo:{from:x,to:w}}; } }
+  return {ok:false};
+}
+const IRREG={go:"went",see:"saw",buy:"bought",have:"had",do:"did",make:"made",take:"took",come:"came",get:"got",say:"said",eat:"ate",meet:"met",leave:"left",find:"found",know:"knew",tell:"told",think:"thought",give:"gave",sleep:"slept",write:"wrote",speak:"spoke",drink:"drank",begin:"began",break:"broke",lose:"lost",pay:"paid",send:"sent",spend:"spent",feel:"felt",hear:"heard",win:"won",sit:"sat",stand:"stood",understand:"understood",forget:"forgot",choose:"chose",catch:"caught",teach:"taught",bring:"brought",fly:"flew",drive:"drove",wake:"woke",run:"ran",swim:"swam",sing:"sang",become:"became",fall:"fell",grow:"grew",hold:"held",keep:"kept",wear:"wore",steal:"stole"};
+function inflected(w,x){ const f=b=>[b+"s",b+"es",b+"d",b+"ed",b+"ing",b.replace(/y$/,"ies"),b.replace(/e$/,"ing")]; return f(w).includes(x)||f(x).includes(w); }
+function tokLev(a,b){ return lev(a,b); }
+function sameBag(a,b){ return a.length===b.length && [...a].sort().join(" ")===[...b].sort().join(" "); }
+
+const MODAL=["can","could","will","would","should","must","may","might","shall"];
+const HAVE=["have","has","had"];
+function diagnose(t,raw){
+  const u=norm(raw).split(" ").filter(Boolean);
+  const exps=accepted(t).list.map(x=>norm(x).split(" "));
+  const e=exps.reduce((b,x)=>tokLev(u,x)<tokLev(u,b)?x:b, exps[0]);
+  const segs=parseF(t.f);
+  const subj=(segs.find(s=>s.tag==="s")||{text:""}).text;
+  const verb=(segs.find(s=>s.tag==="v")||{}).text;
+  const auxSeg=segs.find(s=>s.tag==="a"), eAux=auxSeg?norm(auxSeg.text).split(" ")[0]:null;
+  const hook=CONTENT[t.mid]&&CONTENT[t.mid].diagnose;
+  if(hook){ const r=hook({t,u,e,segs,subj,verb,eAux}); if(r) return r; }
+  const uDo=u.find(w=>DO.includes(w)), uBe=u.find(w=>BE.includes(w));
+  const eDo=eAux?(DO.includes(eAux)?eAux:null):e.find(w=>DO.includes(w));
+  const eBe=eAux?(BE.includes(eAux)?eAux:null):e.find(w=>BE.includes(w));
+  const eMod=MODAL.includes(eAux)?eAux:null, eHave=HAVE.includes(eAux)?eAux:null;
+  const uWh=u.find(w=>WH.includes(w)), eWh=e.find(w=>WH.includes(w));
+  const aux=eAux||eDo||eBe;
+  if(sameBag(u,e)) return {cat:"order",msg: aux ? `Все слова на месте, но порядок не тот. «${aux}» должен стоять перед подлежащим «${subj}».` : "Все слова на месте, но порядок не тот."};
+  if(eMod && uDo && u.includes(eMod)) return {cat:"do_modal",msg:`С модальным глаголом ${eMod} помощник ${uDo} не нужен: ${eMod} сам встаёт перед подлежащим.`};
+  if(eMod && !u.includes(eMod) && (uDo||u.some(w=>MODAL.includes(w)))) return {cat:"modal",msg:"Здесь нужен другой помощник — модальный глагол. Подумай о смысле: «можно / умеешь» → can, «стоит ли» → should, «будет» → will, «не хочешь ли» → would."};
+  if(eMod && u.includes("to") && !e.includes("to")) return {cat:"modal_to",msg:`После ${eMod} глагол идёт без to.`};
+  if(eDo && !uDo && uBe) return {cat:"be_verb",msg:`${verb?`«${verb}» — это`:"Здесь"} обычный глагол, а не состояние. С ним be не работает: нужен помощник ${eDo}.`};
+  if(eBe && uDo && !e.includes(uDo)) return {cat:"do_be",msg:`С be помощник ${uDo} не нужен. Форма be сама встаёт перед подлежащим.`};
+  if(eBe && uBe && !u.includes(eBe)){
+    const past=["was","were"], eP=past.includes(eBe), uP=past.includes(uBe);
+    let msg;
+    if(eP!==uP) msg = eP ? "Это прошлое, нужна форма was или were." : "Это настоящее время, нужна форма am, is или are.";
+    else if(norm(subj)==="there") msg = "После there форма be зависит от того, что идёт дальше: один предмет → is, несколько → are.";
+    else msg = `Подлежащее «${subj}» требует другую форму. ${eP?"I / he / she / it → was; you / we / they → were.":"I → am; he / she / it → is; you / we / they → are."}`;
+    return {cat:"be_form",msg};
+  }
+  if(eDo && uDo && uDo!==eDo && !e.includes(uDo)) return {cat:"do_form",msg: eDo==="did"||uDo==="did" ? "Проверь время: прошлое → did, настоящее → do / does." : `Подлежащее «${subj}» требует ${eDo}. he / she / it и одно существительное → does; I / you / we / they и несколько → do.`};
+  if(eHave && !u.includes(eHave) && u.some(w=>HAVE.includes(w))) return {cat:"be_form",msg:`Подлежащее «${subj}» требует ${eHave}. he / she / it → has; I / you / we / they → have.`};
+  const helper = eDo&&uDo ? eDo : (eMod&&u.includes(eMod) ? eMod : null);
+  if(helper && verb){
+    const vt=norm(verb).split(" ")[0];
+    const forms=[vt+"s",vt+"es",vt.replace(/y$/,"ies"),{have:"has",do:"does",go:"goes"}[vt],vt+"ed",vt+"d",vt.replace(/y$/,"ied"),IRREG[vt],vt+"ing",vt.replace(/e$/,"ing")].filter(Boolean);
+    const bad=u.find(w=>forms.includes(w) && ((w!=="does"&&w!=="did") || u.filter(x=>x===w).length>1));
+    if(bad && !u.includes(vt) && helper==="did") return {cat:"verb_past",msg:`После did глагол стоит в начальной форме: ${bad} → ${vt}. Прошлое уже показал did — второй раз его показывать не нужно.`};
+    if(bad && !u.includes(vt)) return {cat:"verb_s",msg:`После ${helper} глагол стоит в начальной форме: ${bad} → ${vt}.${helper==="does"?" Окончание -s уже «забрал» помощник does.":""}`};
+  }
+  if(aux && !u.some(w=>AUXW.includes(w))) return {cat:"aux_missing",msg:
+      eDo==="did" ? `Не хватает помощника перед подлежащим. Глагол${verb?` «${verb}»`:""} сам вперёд не прыгает. Какой помощник показывает прошлое?`
+    : eDo ? `Не хватает помощника перед подлежащим. У глагола${verb?` «${verb}»`:""} нет своей «прыгающей» формы, поэтому нужен do или does. Какой — зависит от подлежащего «${subj}».`
+    : eMod ? "Не хватает модального глагола перед подлежащим (can, should, will, would…)."
+    : eHave ? "Не хватает помощника have / has перед подлежащим."
+    : "Не хватает помощника перед подлежащим. Без него получается утверждение со знаком вопроса. Какая форма be нужна для «"+subj+"»?"};
+  if(aux && u.includes(aux)){ const sFirst=norm(subj).split(" ")[0]; const iS=u.indexOf(sFirst), iA=u.indexOf(aux);
+    if(sFirst && iS>=0 && iS<iA) return {cat:"order",msg:`«${aux}» стоит после подлежащего. В вопросе он идёт перед ним.`}; }
+  if(eWh && !uWh) return {cat:"wh",msg:"Не хватает вопросительного слова (what, where, why, how…)."};
+  if(!eWh && uWh && !e.includes(uWh)) return {cat:"wh",msg:"Здесь нужен вопрос «да / нет», без вопросительного слова. Начни сразу с помощника."};
+  if(eWh && uWh && uWh!==eWh) return {cat:"wh",msg:`«${uWh}» здесь не подходит. Подумай, о чём именно вопрос.`};
+  if(e.some(w=>w==="a"||w==="an") && !u.some(w=>w==="a"||w==="an")) return {cat:"article",msg:"Не хватает артикля a / an. Перед профессией и предметом в единственном числе он обязателен."};
+  const miss=e.filter(w=>!u.includes(w)).length, extra=u.filter(w=>!e.includes(w)).length;
+  if(u.length===e.length){ const dj=e.map((w,j)=>w!==u[j]?j:-1).filter(j=>j>=0); if(dj.length===1) return {cat:"other",msg:`Почти! Одно слово не то: проверь «${u[dj[0]]}».`}; }
+  if(miss===1 && extra===1) return {cat:"other",msg:`Почти! Одно слово не то: проверь «${u.find(w=>!e.includes(w))}».`};
+  if(miss && !extra) return {cat:"other",msg:`Почти! Не хватает ${miss===1?"одного слова":"нескольких слов"}.`};
+  if(extra && !miss) return {cat:"other",msg:`Есть ${extra===1?"лишнее слово":"лишние слова"}.`};
+  return {cat:"other",msg:t.hint};
+}
+
+/* ============ SOUND ============ */
+const HAS_TTS = "speechSynthesis" in window;
+let VOICE=null;
+function pickVoice(){ try{ const v=speechSynthesis.getVoices(); VOICE=v.find(x=>/en-GB/i.test(x.lang))||v.find(x=>/^en/i.test(x.lang))||null; }catch(e){} }
+if(HAS_TTS){ pickVoice(); try{ speechSynthesis.onvoiceschanged=pickVoice; }catch(e){} }
+function say(text){ if(!HAS_TTS) return; try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang=VOICE?VOICE.lang:"en-GB"; if(VOICE) u.voice=VOICE; u.rate=.92; speechSynthesis.speak(u); }catch(e){} }
+let AC=null;
+function beep(){ if(!S.sound) return; try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); const t0=AC.currentTime;
+  [[660,0],[880,.09]].forEach(([f,d])=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type="sine"; o.frequency.value=f;
+    g.gain.setValueAtTime(0,t0+d); g.gain.linearRampToValueAtTime(.12,t0+d+.02); g.gain.exponentialRampToValueAtTime(.001,t0+d+.25);
+    o.connect(g).connect(AC.destination); o.start(t0+d); o.stop(t0+d+.3); }); }catch(e){} }
+
+/* ============ VIEWS ============ */
+let VIEW="map", ARG=null, T=null, DEMO={i:0,k:0}, MC={}, MCO={};
+
+function updateTop(){
+  $("#top-xp").textContent = S.xp+" XP";
+  const st=streak(); $("#top-days").textContent = st ? st+" "+plural(st,"день","дня","дней")+" подряд" : "Начни серию сегодня";
+  $("#snd").textContent = S.sound ? "Звук: вкл" : "Звук: выкл";
+}
+function go(v,arg){ VIEW=v; ARG=arg; render(); window.scrollTo(0,0); }
+function render(){
+  updateTop();
+  const app=$("#app");
+  if(VIEW==="map") app.innerHTML=viewMap();
+  else if(VIEW==="lesson") { app.innerHTML=viewLesson(ARG); drawDemo(false); }
+  else if(VIEW==="train") { app.innerHTML=viewTrain(); mountTask(); }
+  else if(VIEW==="results") app.innerHTML=viewResults();
+  else if(VIEW==="placement") app.innerHTML=viewPlacement();
+}
+function modTitle(id){ return id==="exam"?"Итоговый экзамен":(MODULES.find(x=>x.id===id)||{t:id}).t; }
+
+function modStatus(m){
+  if(!CONTENT[m.id]) return {pill:`<span class="pill">Скоро</span>`, pct:0};
+  const st=modState(m.id), s=S.sess;
+  if(s && s.mid===m.id && s.mode==="full") return {pill:`<span class="pill acc">${s.i} / ${s.ids.length}</span>`, pct:s.i/s.ids.length*100};
+  if(st.best!=null) return {pill:`<span class="pill ${st.best>=40?"ok":"warn"}">Лучший: ${st.best} / 50</span>`, pct:st.best/50*100};
+  if(S.placement && S.placement.start===m.id) return {pill:`<span class="pill acc">Начни отсюда</span>`, pct:0};
+  if(st.placed) return {pill:`<span class="pill ok">Знаешь (по тесту)</span>`, pct:0};
+  if(st.lesson) return {pill:`<span class="pill acc">Урок пройден</span>`, pct:5};
+  return {pill:`<span class="pill acc">Новый</span>`, pct:0};
+}
+function viewMap(){
+  const s=S.sess; let resume="";
+  if(s){
+    resume=`<section class="card resume"><div style="flex:1;min-width:200px"><div class="eyebrow">Продолжить</div><h2 style="margin-top:4px">${esc(modTitle(s.mid))}${s.mode==="mistakes"?" · ошибки":""}</h2><p class="muted small">Задание ${s.i+1} из ${s.ids.length}</p></div><button class="btn primary" data-act="train" data-id="${s.mid}" data-mode="${s.mode}">Продолжить</button></section>`; }
+  let lv="";
+  for(const L of [1,2,3,4]){
+    lv+=`<section class="level"><div class="level-head"><h2>Уровень ${L}</h2><span class="muted small">${LEVELS[L]}</span></div><div class="grid">`;
+    for(const m of MODULES.filter(x=>x.lvl===L)){
+      const n=MODULES.indexOf(m)+1, has=!!CONTENT[m.id], st=modStatus(m), bank=(S.bank[m.id]||[]).length;
+      lv+=`<article class="card mod ${has?"":"locked"}"><div class="mod-top"><span class="mod-num">Модуль ${n}</span>${st.pill}</div>
+        <div class="mod-title">${esc(m.t)}</div><div class="mod-ex">${esc(m.ex)}</div>
+        ${has?`<div class="bar"><i style="width:${st.pct}%"></i></div>
+        <div class="row"><button class="btn" data-act="lesson" data-id="${m.id}">${modState(m.id).lesson?"Урок ещё раз":"Урок"}</button><button class="btn primary" data-act="train" data-id="${m.id}" data-mode="full">Тренажёр</button>
+        ${bank?`<button class="btn ghost" data-act="train" data-id="${m.id}" data-mode="mistakes">Ошибки: ${bank}</button>`:""}</div>`:""}
+      </article>`;
+    }
+    lv+=`</div></section>`;
+  }
+  return `<section class="hero"><h1>Учимся задавать вопросы</h1>
+    <p>16 модулей от простого к сложному. В каждом: урок с правилом, мини-проверка и 50 заданий с подсказками. После каждого ответа — другие способы спросить то же самое.</p>
+    <div class="legend"><span><i style="background:var(--q)"></i>вопросительное слово</span><span><i style="background:var(--a)"></i>помощник (be, do…)</span><span><i style="background:var(--s)"></i>подлежащее</span><span><i style="background:var(--v)"></i>глагол</span></div></section>
+    ${resume}
+    <section class="card resume"><div style="flex:1;min-width:200px"><div class="eyebrow">Вводный тест · 16 вопросов · 5 минут</div>
+      <h2 style="margin-top:4px">${S.placement?"Начни с модуля "+(MODULES.findIndex(x=>x.id===S.placement.start)+1)+": "+esc(modTitle(S.placement.start)):"С какого модуля начать?"}</h2>
+      <p class="muted small">${S.placement?`Результат теста: ${S.placement.score} из 16. Можно пройти ещё раз.`:"По одному вопросу на каждый модуль. Тест покажет, что ты уже знаешь, а с чего стоит начать."}</p></div>
+      <button class="btn ${S.placement?"":"primary"}" data-act="placement">${S.placement?"Пройти тест заново":"Пройти тест"}</button></section>
+    ${lv}
+    <section class="card mod"><div class="mod-top"><span class="mod-num">Итог</span>${S.examBest!=null?`<span class="pill ${S.examBest>=40?"ok":"warn"}">Лучший: ${S.examBest} / 50</span>`:`<span class="pill acc">Новый</span>`}</div>
+      <div class="mod-title">Итоговый экзамен: 50 заданий из всех модулей</div>
+      <div class="mod-ex">Задания перемешаны: по 3 из каждого модуля. Подсказки работают, но засчитываются только ответы с первой попытки. В конце — разбор по модулям.</div>
+      ${S.examBest!=null?`<div class="bar"><i style="width:${S.examBest/50*100}%"></i></div>`:""}
+      <div class="row"><button class="btn primary" data-act="train" data-id="exam" data-mode="exam">${S.examBest!=null?"Сдать ещё раз":"Начать экзамен"}</button></div></section>`;
+}
+
+/* ---- lesson ---- */
+function slot(tag,text,label){ return `<div class="fslot"><span class="tok t-${tag}">${text}</span><small>${label}</small></div>`; }
+const PLUS=`<span class="plus">+</span>`;
+const ex = en => `<span class="ex"><span class="mono">${esc(en)}</span>${sayBtn(en)}</span>`;
+function grp(parts){ const txt=parts.map(p=>p[1]).join(" ").replace(/ ([?.])$/,"$1");
+  return `<div class="ans-line">${parts.map(([tag,w])=>`<span class="tok t-${tag}">${esc(w)}</span>`).join(" ")}${sayBtn(txt)}</div>`; }
+function rows(head,list){ return `<div class="tbl-wrap"><table><thead><tr>${head.map(h=>`<th>${h}</th>`).join("")}</tr></thead><tbody>${list.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`; }
+const tA = w => `<span class="tok t-a">${w}</span>`;
+
+function m1Rules(){
+  const errs=[["You are tired?","Are you tired?","Так говорят только с удивлением («Ты устал?!»). Обычный вопрос — через прыжок be."],
+    ["Do you are ready?","Are you ready?","С be помощник do не нужен."],
+    ["Where you are?","Where are you?","После вопросительного слова сразу идёт be."],
+    ["Are you agree?","Do you agree?","agree, like, want, know — глаголы. Им нужен do, а не be."],
+    ["Is he student?","Is he a student?","Перед профессией нужен артикль a / an."],
+    ["Where was you?","Where were you?","you всегда с were."],
+    ["Is there many people?","Are there many people?","Много людей → are."],
+    ["Yes, I'm.","Yes, I am.","В кратком ответе «да» be не сокращают."],
+    ["How is your name?","What is your name?","Русское «как тебя зовут» — по-английски «что твоё имя»."],
+    ["How many years are you?","How old are you?","Возраст — только через How old."],
+    ["Is your flat is big?","Is your flat big?","Be один: он переехал вперёд, на старом месте его больше нет."],
+    ["Where did you born?","Where were you born?","«Родиться» — be born, поэтому was / were, а не did."]];
+  return [
+  {id:"why",title:"Почему это трудно",body:`
+    <p>В русском вопрос отличается от утверждения только интонацией: «Ты готов.» → «Ты готов?». Слова остаются на своих местах.</p>
+    <p>В английском так не работает: чтобы получился вопрос, слова <b>меняются местами</b>. Фраза <span class="mono">You are ready?</span> прозвучит как удивлённый переспрос («Ты что, уже готов?!»), а не как обычный вопрос.</p>
+    <p>Хорошая новость: с глаголом be перестановка самая простая — переезжает всего одно слово. Поэтому с него и начинаем.</p>`},
+  {id:"formula",title:"Формула и порядок действий",body:`
+    <p class="muted">Вопрос «да / нет» (общий)</p>
+    <div class="formula">${slot("a","Am / Is / Are","be")}${PLUS}${slot("s","you","подлежащее")}${PLUS}${slot("o","ready","остальное")}<span class="plus">?</span></div>
+    <p class="muted">Вопрос с вопросительным словом (специальный)</p>
+    <div class="formula">${slot("q","Where","вопрос. слово")}${PLUS}${slot("a","was / were","be")}${PLUS}${slot("s","they","подлежащее")}${PLUS}${slot("o","…","остальное")}<span class="plus">?</span></div>
+    <ol class="steps">
+      <li>Составь утверждение: <span class="mono">She <b>is</b> at home.</span></li>
+      <li>Найди форму be и переставь её <b>перед подлежащим</b>: <span class="mono"><b>Is</b> she at home?</span></li>
+      <li>Нужно спросить «где? когда? почему?» — поставь вопросительное слово в самое начало, а ту часть, о которой спрашиваешь, убери: <span class="mono"><b>Where</b> is she?</span></li>
+      <li>В конце знак вопроса. Помощник do не нужен — be справляется сам.</li></ol>`},
+  {id:"forms",title:"Какую форму be выбрать",body:`
+    ${rows(["Подлежащее","Сейчас","В прошлом","Пример"],[
+      ["I",tA("am"),tA("was"),ex("Am I late?")+" "+ex("Was I right?")],
+      ["he / she / it, одно имя, один предмет",tA("is"),tA("was"),ex("Is she here?")+" "+ex("Was it good?")],
+      ["you / we / they, несколько предметов",tA("are"),tA("were"),ex("Are you ready?")+" "+ex("Were they there?")]])}
+    <div class="note"><b>you</b> — всегда are / were, даже если это один человек. «You was» — самая частая ошибка.</div>
+    <p>Прошлое (was / were) выбираем, когда в вопросе есть маркеры: <span class="mono">yesterday, last night, last week, two days ago, in 2019, when you were a child</span>.</p>
+    <p>Подлежащее с <b>and</b> — это несколько человек: <span class="mono">Are Tom and Kate at work?</span> Названия, имена и «это» — как he / she / it: <span class="mono">Is London expensive? Is this your bag?</span></p>`},
+  {id:"when",title:"Когда в вопросе нужен be",body:`
+    <p>Главное правило: <b>если в предложении нет глагола-действия</b> (work, like, go, eat…), значит, его роль играет be.</p>
+    ${rows(["Что спрашиваем","Пример"],[
+      ["Возраст",ex("How old are you?")],["Профессия",ex("Is she a doctor?")],["Место",ex("Where is the station?")],
+      ["Откуда человек",ex("Where are you from?")],["Состояние, чувства",ex("Are you tired?")+" "+ex("Is he angry?")],
+      ["Качество, оценка",ex("Is it expensive?")+" "+ex("Was the film good?")],["Погода",ex("Is it cold today?")],
+      ["Цена",ex("How much is it?")],["Время, дата",ex("What time is it?")+" "+ex("When is your birthday?")],
+      ["Рождение",ex("Where were you born?")]])}`},
+  {id:"traps",title:"Ловушки перевода",body:`
+    <p>Главный источник ошибок: в русском и английском слова разных частей речи. Где у нас глагол, у них может быть be + прилагательное, и наоборот.</p>
+    <div class="cols">
+      <div class="col"><h3>По-русски глагол → по-английски be</h3><div class="pairs">
+        <span>бояться</span>${ex("Are you afraid of dogs?")}<span>опаздывать</span>${ex("Why are you late?")}
+        <span>хотеть есть</span>${ex("Are you hungry?")}<span>интересоваться</span>${ex("Are you interested in art?")}
+        <span>быть уверенным</span>${ex("Are you sure?")}<span>быть правым</span>${ex("Am I right?")}
+        <span>мёрзнуть</span>${ex("Are you cold?")}<span>родиться</span>${ex("When were you born?")}
+        <span>отсутствовать</span>${ex("Is he away?")}</div></div>
+      <div class="col"><h3>Похоже на состояние, но это глагол → do</h3><div class="pairs">
+        <span>соглашаться</span>${ex("Do you agree?")}<span>нравиться</span>${ex("Do you like it?")}
+        <span>знать</span>${ex("Do you know him?")}<span>хотеть</span>${ex("Do you want tea?")}
+        <span>нуждаться</span>${ex("Do you need help?")}<span>понимать</span>${ex("Do you understand?")}
+        <span>верить</span>${ex("Do you believe me?")}<span>значить</span>${ex("What does it mean?")}</div></div>
+    </div>
+    <div class="note">Проверка: можно ли сказать «он <i>является</i> …ым» или «он <i>находится</i> …»? Тогда be. Если слово отвечает на «что делает?» — это глагол, и ему нужен do (модуль 2).</div>`},
+  {id:"wh",title:"Вопросительные слова с be",body:`
+    ${rows(["Слово","Значение","Пример"],[
+      ["What","что, какой",ex("What is your name?")],["Where","где; откуда (+ from)",ex("Where are my keys?")],
+      ["When","когда",ex("When is the meeting?")],["Why","почему",ex("Why are you sad?")],
+      ["Who","кто",ex("Who is that girl?")],["Whose","чей",ex("Whose phone is this?")],
+      ["Which","который (из нескольких)",ex("Which bag is yours?")],["How","как",ex("How was the trip?")],
+      ["How old","сколько лет",ex("How old is he?")],["How much / many","сколько",ex("How much is it?")+" "+ex("How many people are there?")],
+      ["What … like","какой (описание)",ex("What is your boss like?")],["What time","во сколько, который час",ex("What time is it?")]])}
+    <p>Если вопросительное слово «склеено» с существительным, они идут вместе: <span class="mono">Whose phone is this? Which bag is yours? How many people are there?</span></p>`},
+  {id:"long",title:"Длинное подлежащее",body:`
+    <p>Подлежащее бывает длинным, из нескольких слов. Be всё равно встаёт <b>перед всей группой</b> — разрывать её нельзя.</p>
+    ${grp([["a","Is"],["s","your new flat"],["o","near the station"],["p","?"]])}
+    ${grp([["a","Are"],["s","the people in your office"],["o","friendly"],["p","?"]])}
+    ${grp([["a","Was"],["s","the film you saw yesterday"],["o","good"],["p","?"]])}
+    ${grp([["q","Where"],["a","is"],["s","the nearest bus stop"],["p","?"]])}
+    <div class="note">Не оставляй второй be на старом месте: <span class="mono" style="color:var(--bad);text-decoration:line-through">Is your new flat is near the station?</span></div>`},
+  {id:"there",title:"Есть ли…? There is / there are",body:`
+    <p>Оборот <b>there is / there are</b> значит «есть, находится, имеется». В вопросе is / are тоже прыгает вперёд — перед there.</p>
+    ${rows(["Что спрашиваем","Вопрос","Ответы"],[
+      ["Один предмет",ex("Is there a bank near here?"),`<span class="mono">Yes, there is. / No, there isn't.</span>`],
+      ["Несколько",ex("Are there any shops?"),`<span class="mono">Yes, there are. / No, there aren't.</span>`],
+      ["В прошлом",ex("Was there a problem?")+" "+ex("Were there many people?"),`<span class="mono">Yes, there was. / No, there weren't.</span>`],
+      ["Сколько",ex("How many rooms are there?")+" "+ex("How much milk is there?"),`<span class="mono">There are three.</span>`]])}
+    <p>В вопросах вместо <b>some</b> обычно <b>any</b>: <span class="mono">Are there any questions?</span></p>
+    <div class="note">Не путай: <span class="mono">Is there a bank?</span> — есть ли он вообще. <span class="mono">Where is the bank?</span> — где тот банк, о котором мы знаем.</div>`},
+  {id:"short",title:"Краткие ответы",body:`
+    <p>На вопрос «да / нет» англичане редко отвечают одним Yes или No — это звучит сухо. Обычно повторяют подлежащее и форму be.</p>
+    ${rows(["Вопрос","Да","Нет"],[
+      [ex("Are you ready?"),"<span class='mono'>Yes, I am.</span>","<span class='mono'>No, I'm not.</span>"],
+      [ex("Is your sister at home?"),"<span class='mono'>Yes, she is.</span>","<span class='mono'>No, she isn't.</span>"],
+      [ex("Were they late?"),"<span class='mono'>Yes, they were.</span>","<span class='mono'>No, they weren't.</span>"],
+      [ex("Was I right?"),"<span class='mono'>Yes, you were.</span>","<span class='mono'>No, you weren't.</span>"]])}
+    <ul class="steps"><li>Подлежащее меняется: спросили про <b>you</b> — отвечаешь про <b>I</b> (и форма меняется: were → was).</li>
+      <li>Имя заменяется местоимением: <span class="mono">Is Anna…? → Yes, she is.</span></li>
+      <li>«Да» не сокращаем: <span class="mono">Yes, I am</span>, а не <span class="mono">Yes, I'm</span>. «Нет» можно сокращать.</li></ul>`},
+  {id:"sound",title:"Интонация и сокращения",body:`
+    <p><b>Вопрос «да / нет»</b> — голос идёт вверх в конце ↗: ${ex("Are you ready?")}</p>
+    <p><b>Вопрос с вопросительным словом</b> — голос идёт вниз ↘: ${ex("Where are you?")}</p>
+    <p>В разговоре is после вопросительного слова почти всегда сокращают: <span class="mono">What's, Where's, Who's, How's, When's</span>. ${ex("Where's my phone?")}</p>
+    <p>В начале вопроса форму be не сокращают: <span class="mono">Is it…? Are you…?</span> — всегда полностью.</p>`},
+  {id:"tips",title:"Лайфхаки и запоминалки",body:`<div class="tips">${[
+    ["mem","Запоминалка","Be — кенгуру","В вопросе be делает один прыжок вперёд, через подлежащее. Прыгает только он — остальные слова стоят на месте.",["Are you ready?"]],
+    ["mem","Запоминалка","Be и do не живут вместе","Как кошка с собакой: в одном вопросе либо be, либо do. «Do you are…» не бывает никогда.",[]],
+    ["mem","Запоминалка","You — это «Вы»","Раньше you было вежливым «Вы». А мы говорим «Вы были», а не «Вы был». Поэтому you — всегда are и were, даже про одного человека.",["Were you at home?"]],
+    ["mem","Запоминалка","Краткий ответ — эхо","Возьми начало вопроса и переверни: Are you → I am, Is she → she is, Were they → they were.",["Is she busy? Yes, she is."]],
+    ["obs","Наблюдение","Англичане спрашивают «насколько ты старый»","Возраст, размер, расстояние — через How + прилагательное: How old, How big, How far. Никаких «How many years».",["How old is your car?"]],
+    ["obs","Наблюдение","Родиться — это быть рождённым","Born — не действие, а состояние «рождённый». Поэтому I was born, Where were you born — с be.",["When were you born?"]],
+    ["obs","Наблюдение","В жизни вопрос часто сжимают","В разговоре Are you выпадает: Ready? Hungry? Tired? Звучит дружелюбно, но полную форму всё равно надо уметь строить.",["Hungry?"]],
+    ["obs","Наблюдение","How are you? — это приветствие","Это не вопрос о делах. Отвечают коротко и спрашивают в ответ: «Fine, thanks. And you?»",["How are you?","Fine, thanks. And you?"]],
+    ["hack","Лайфхак","Поменяй местами первые два слова","Для простого утверждения: You are late → Are you late? She was there → Was she there? Работает, когда подлежащее — одно слово.",["Was she there?"]],
+    ["hack","Лайфхак","Тест «является / находится»","Можно сказать «он является…» или «он находится…»? Значит, be. Слово отвечает на «что делает?» — значит, нужен do.",[]],
+    ["hack","Лайфхак","How come — спасательный круг","Разговорное «как так вышло, что…» строится БЕЗ перестановки: How come you're late? Выручит, если запутался, но не заменяет Why.",["How come you're late?"]],
+    ["hack","Лайфхак","Is it? / Are you? — «Да ну?»","Короткий вопрос-эхо показывает интерес к собеседнику: «I'm from Canada.» — «Are you? Cool!» Подробно — в модуле 14.",["Are you? Cool!"]]
+    ].map(([k,lab,h,p,exs])=>`<div class="tip tip-${k}"><span class="pill">${lab}</span><h3>${h}</h3><p>${p}</p>${exs.map(e=>`<div>${ex(e)}</div>`).join("")}</div>`).join("")}</div>`},
+  {id:"errors",title:"Типичные ошибки",body:`
+    <div class="errs">${errs.map(([n,y,w])=>`<div class="err"><span class="no">${esc(n)}</span><span class="yes">${esc(y)}</span><span class="why">${esc(w)}</span></div>`).join("")}</div>`}
+  ];
+}
+CONTENT.m1.rules = m1Rules; CONTENT.m1.demos = DEMOS;
+function curDemos(){ return (CONTENT[ARG]&&CONTENT[ARG].demos)||[]; }
+
+/* ---- module 2: do / does ---- */
+CONTENT.m2.title = "Do / does: Present Simple";
+CONTENT.m2.idea = "Обычный глагол прыгать не умеет. Вместо него вперёд выходит помощник do / does, а глагол остаётся на месте — голым, без -s.";
+CONTENT.m2.catSec = {order:"formula",aux_missing:"why",do_form:"forms",verb_s:"forms",do_be:"bedo",be_verb:"bedo",be_form:"forms",wh:"wh",short:"short",article:"errors",other:"formula"};
+CONTENT.m2.tips = {aux_missing:"Обычный глагол (like, work, live, know…) в вопросе никогда не стоит первым. Сначала do / does, потом подлежащее, потом глагол.",
+  order:"Формула: (вопрос. слово) → do / does → подлежащее → глагол. Помощник всегда перед подлежащим, глагол — после."};
+CONTENT.m2.demos = [
+  {name:"Да / нет", frames:[
+    {t:[["she","She","s"],["works","works","v"],["bank","in a bank","o"],["p",".","p"]], c:"Утверждение. Глагол <b>works</b> — обычный, своей «прыгающей» формы у него нет."},
+    {t:[["does","Does","a"],["she","she","s"],["works","works","v"],["bank","in a bank","o"],["p","?","p"]], c:"Зовём помощника. she → <b>does</b>, ставим его перед подлежащим."},
+    {t:[["does","Does","a"],["she","she","s"],["works","work","v"],["bank","in a bank","o"],["p","?","p"]], c:"Окончание -s уже есть в does (do + es), поэтому у глагола оно пропадает: works → <b>work</b>. Готово: <i>Does she work in a bank?</i>"}]},
+  {name:"С вопросительным словом", frames:[
+    {t:[["they","They","s"],["live","live","v"],["rome","in Rome","o"],["p",".","p"]], c:"Хотим спросить, <b>где</b> они живут."},
+    {t:[["wh","Where","q"],["they","they","s"],["live","live","v"],["p","?","p"]], c:"in Rome меняем на <b>Where</b> и ставим в начало. Но <i>Where they live?</i> — ещё не вопрос: нет помощника."},
+    {t:[["wh","Where","q"],["do","do","a"],["they","they","s"],["live","live","v"],["p","?","p"]], c:"they → <b>do</b>, сразу после Where: <i>Where do they live?</i>"}]},
+  {name:"Do + do", frames:[
+    {t:[["you","You","s"],["work","work","v"],["as","as a designer","o"],["p",".","p"]], c:"Хотим спросить, кем человек работает."},
+    {t:[["wh","What","q"],["do","do","a"],["you","you","s"],["do2","do","v"],["p","?","p"]], c:"<i>What do you do?</i> Первый <b>do</b> — помощник, он ничего не значит. Второй <b>do</b> — глагол «делать». Два do подряд — это нормально."}]},
+  {name:"Ловушка: be или do", frames:[
+    {t:[["you","You","s"],["like","like","v"],["jazz","jazz","o"],["p",".","p"]], c:"«Тебе нравится джаз» — по-русски похоже на состояние."},
+    {t:[["are","Are","a","bad"],["you","you","s"],["like","like","v"],["jazz","jazz","o"],["p","?","p"]], c:"<i>Are you like jazz?</i> — ошибка. like — глагол, be с ним не работает."},
+    {t:[["are","Do","a"],["you","you","s"],["like","like","v"],["jazz","jazz","o"],["p","?","p"]], c:"Правильно: <i>Do you like jazz?</i> А с be спросили бы иначе: <i>Are you a jazz fan?</i> — там нет глагола."}]}
+];
+CONTENT.m2.rules = function(){
+  const errs=[["You like coffee?","Do you like coffee?","Без do звучит как удивлённый переспрос."],
+    ["Where you live?","Where do you live?","После вопросительного слова нужен помощник."],
+    ["Does she works?","Does she work?","Одна s на вопрос: она уже в does."],
+    ["Do she live here?","Does she live here?","she → does."],
+    ["Does your parents live here?","Do your parents live here?","Родители — несколько → do."],
+    ["What means it?","What does it mean?","Обычный глагол не прыгает вперёд — даже после what."],
+    ["How much it costs?","How much does it cost?","Нужен does, а costs → cost."],
+    ["Are you like jazz?","Do you like jazz?","like — глагол, be не нужен."],
+    ["Does she has a car?","Does she have a car?","has = have + s. После does → have."],
+    ["Yes, I like.","Yes, I do.","Краткий ответ повторяет помощник, а не глагол."],
+    ["How do you think?","What do you think?","«Как думаешь?» — по-английски What."],
+    ["What do you doing?","What do you do? / What are you doing?","Do + глагол без -ing. С -ing нужен be (модуль 7)."]];
+  return [
+  {id:"why",title:"Зачем нужен do",body:`
+    <p>В модуле 1 вперёд прыгал be. Но в большинстве предложений be нет: <span class="mono">I <b>work</b>. She <b>likes</b> tea. They <b>live</b> here.</span> Обычные глаголы прыгать вперёд <b>не умеют</b>.</p>
+    <p>Поэтому английский зовёт помощника — <b>do</b> (или <b>does</b>). Он встаёт перед подлежащим и показывает: «внимание, это вопрос». Сам по себе он ничего не значит и не переводится.</p>
+    <p>Самая частая ошибка — забыть помощника: <span class="mono">You like coffee?</span> Носитель поймёт, но услышит удивление («Ты что, любишь кофе?!»), а не обычный вопрос.</p>`},
+  {id:"formula",title:"Формула и порядок действий",body:`
+    <p class="muted">Вопрос «да / нет»</p>
+    <div class="formula">${slot("a","Do / Does","помощник")}${PLUS}${slot("s","you","подлежащее")}${PLUS}${slot("v","like","глагол без -s")}${PLUS}${slot("o","coffee","остальное")}<span class="plus">?</span></div>
+    <p class="muted">Вопрос с вопросительным словом</p>
+    <div class="formula">${slot("q","Where","вопрос. слово")}${PLUS}${slot("a","do / does","помощник")}${PLUS}${slot("s","she","подлежащее")}${PLUS}${slot("v","work","глагол без -s")}<span class="plus">?</span></div>
+    <ol class="steps">
+      <li>Составь утверждение: <span class="mono">She <b>works</b> in a bank.</span></li>
+      <li>Выбери помощника по подлежащему: she → <b>does</b>. Поставь его перед подлежащим.</li>
+      <li>Убери окончание у глагола: works → <b>work</b>. <span class="mono">Does she work in a bank?</span></li>
+      <li>Нужно «где? когда? что?» — вопросительное слово в начало, ответ убираем: <span class="mono">Where does she work?</span></li></ol>`},
+  {id:"forms",title:"Do или does",body:`
+    ${rows(["Подлежащее","Помощник","Пример"],[
+      ["I / you / we / they",tA("do"),ex("Do you smoke?")+" "+ex("Where do they live?")],
+      ["несколько: my parents, the kids, Tom and Ann",tA("do"),ex("Do your parents work?")],
+      ["he / she / it",tA("does"),ex("Does she smoke?")+" "+ex("Where does he live?")],
+      ["одно существительное: my sister, the shop, this bus",tA("does"),ex("Does the shop open on Sunday?")]])}
+    <div class="note"><b>Одна s на вопрос.</b> В утверждении -s у глагола: <span class="mono">She work<b>s</b></span>. В вопросе она переезжает в помощника: <span class="mono">Doe<b>s</b> she work?</span> У глагола её больше нет.</div>
+    ${rows(["В утверждении","В вопросе после does"],[
+      ["works, lives, likes","work, live, like"],["watches, goes, does","watch, go, do"],
+      ["studies, tries","study, try"],["has","have"]])}`},
+  {id:"when",title:"Когда используется Present Simple",body:`
+    ${rows(["Что спрашиваем","Пример"],[
+      ["Привычки, регулярные действия",ex("Do you go to the gym?")+" "+ex("How often do you cook?")],
+      ["Постоянная ситуация: работа, жильё",ex("Where do you work?")+" "+ex("Does she live alone?")],
+      ["Вкусы и мнения",ex("Do you like sushi?")+" "+ex("What do you think?")],
+      ["Факты",ex("Does water boil at 100 degrees?")],
+      ["Расписание",ex("When does the train leave?")+" "+ex("What time does the shop close?")],
+      ["Глаголы состояния: know, want, need, mean, cost, believe",ex("Do you know him?")+" "+ex("How much does it cost?")]])}
+    <p>Слова-маркеры: <span class="mono">usually, often, sometimes, always, never, every day, on Mondays, at weekends, once a week</span>. В вопросе они стоят <b>перед глаголом</b>: <span class="mono">Do you <b>usually</b> walk to work?</span></p>`},
+  {id:"bedo",title:"Be или do — как выбрать",body:`
+    <p>Главный вопрос: <b>есть ли в предложении глагол-действие?</b> Есть — нужен do. Нет — значит, его роль играет be.</p>
+    <div class="cols">
+      <div class="col"><h3>Нет глагола → be</h3><div class="pairs">
+        <span>голоден</span>${ex("Are you hungry?")}<span>учитель</span>${ex("Is she a teacher?")}<span>дорого</span>${ex("Is it expensive?")}
+        <span>откуда</span>${ex("Are you from Spain?")}<span>курильщик</span>${ex("Are you a smoker?")}</div></div>
+      <div class="col"><h3>Есть глагол → do</h3><div class="pairs">
+        <span>хотеть есть</span>${ex("Do you want to eat?")}<span>преподавать</span>${ex("Does she teach?")}<span>стоить</span>${ex("Does it cost a lot?")}
+        <span>происходить</span>${ex("Do you come from Spain?")}<span>курить</span>${ex("Do you smoke?")}</div></div>
+    </div>
+    <div class="note">Do и be в одном простом вопросе не встречаются. Ни <span class="mono">Do you are…</span>, ни <span class="mono">Are you like…</span>.</div>`},
+  {id:"have",title:"Have: «у тебя есть…?»",body:`
+    <p><b>Have</b> («иметь») — обычный глагол, поэтому с ним нужен do / does:</p>
+    ${grp([["a","Do"],["s","you"],["v","have"],["o","a car"],["p","?"]])}
+    ${grp([["a","Does"],["s","she"],["v","have"],["o","any kids"],["p","?"]])}
+    <p>В британском английском есть второй вариант — <b>have got</b>. Там do не нужен: прыгает сам have / has.</p>
+    ${grp([["a","Have"],["s","you"],["v","got"],["o","a car"],["p","?"]])}
+    ${rows(["Вопрос","Краткий ответ"],[["<span class='mono'>Do you have a car?</span>","<span class='mono'>Yes, I do. / No, I don't.</span>"],["<span class='mono'>Have you got a car?</span>","<span class='mono'>Yes, I have. / No, I haven't.</span>"]])}
+    <div class="note">Не смешивай: <span class="mono" style="color:var(--bad);text-decoration:line-through">Do you have got…?</span> <span class="mono" style="color:var(--bad);text-decoration:line-through">Does she has…?</span> Форма <span class="mono">Have you a car?</span> устарела.</div>`},
+  {id:"wh",title:"Вопросительные слова с do / does",body:`
+    ${rows(["Слово","Пример","Перевод"],[
+      ["What",ex("What do you do?"),"Кем ты работаешь?"],["What … mean",ex("What does it mean?"),"Что это значит?"],
+      ["Where",ex("Where do you live?"),"Где ты живёшь?"],["When",ex("When does it start?"),"Когда начинается?"],
+      ["What time",ex("What time does the shop close?"),"Во сколько закрывается магазин?"],
+      ["Why",ex("Why do you think so?"),"Почему ты так думаешь?"],["How",ex("How do you know?"),"Откуда ты знаешь?"],
+      ["How often",ex("How often do you train?"),"Как часто ты тренируешься?"],["How much",ex("How much does it cost?"),"Сколько это стоит?"],
+      ["Which",ex("Which one do you want?"),"Какой ты хочешь?"]])}
+    <p>Вопросительное слово всегда в начале, а дальше та же формула: <b>do / does + подлежащее + глагол</b>.</p>`},
+  {id:"short",title:"Краткие ответы",body:`
+    <p>Отвечаем помощником, а не глаголом. Глагол второй раз не повторяем.</p>
+    ${rows(["Вопрос","Да","Нет"],[
+      [ex("Do you like it?"),"<span class='mono'>Yes, I do.</span>","<span class='mono'>No, I don't.</span>"],
+      [ex("Does she smoke?"),"<span class='mono'>Yes, she does.</span>","<span class='mono'>No, she doesn't.</span>"],
+      [ex("Do your parents know?"),"<span class='mono'>Yes, they do.</span>","<span class='mono'>No, they don't.</span>"],
+      [ex("Does it hurt?"),"<span class='mono'>Yes, it does.</span>","<span class='mono'>No, it doesn't.</span>"]])}
+    <ul class="steps"><li><span class="mono">Yes, I like</span> и <span class="mono">Yes, I know</span> в кратком ответе — ошибка. Только <span class="mono">Yes, I do</span>.</li>
+      <li>Можно и полнее: <span class="mono">Yes, I do. I love it.</span> — так звучит живее.</li></ul>`},
+  {id:"sound",title:"Как это звучит в речи",body:`
+    <p>Помощник в быстрой речи почти исчезает. <span class="mono">Do you</span> звучит как «дъю»: ${ex("Do you like it?")}</p>
+    <p><span class="mono">Does he / does she</span> сливаются в «дъзи», «дъши»: ${ex("Does she know?")}</p>
+    <p>Интонация та же, что и в модуле 1: вопрос «да / нет» — голос вверх ↗, с вопросительным словом — вниз ↘. ${ex("Where do you work?")}</p>`},
+  {id:"tips",title:"Лайфхаки и запоминалки",body:`<div class="tips">${[
+    ["mem","Запоминалка","Does — жадина","Забирает -s у глагола себе. Если в вопросе есть does, глагол остаётся «голым»: Does she work?",["Does she work?"]],
+    ["mem","Запоминалка","Одна s на предложение","She works → Does she work. Буква s всегда одна: либо у глагола, либо у помощника. Двух не бывает.",[]],
+    ["mem","Запоминалка","Do — немой помощник","В вопросе do ничего не значит и не переводится. Это просто сигнал: «сейчас будет вопрос».",["Do you smoke?"]],
+    ["mem","Запоминалка","Отвечай помощником","Как спросили, так и отвечай: Do you…? → I do. Does he…? → he does. Глагол не повторяем.",["Does it hurt? No, it doesn't."]],
+    ["obs","Наблюдение","Шекспир обходился без do","400 лет назад глаголы прыгали сами: «Like you it?», «Know you him?». Потом их заменил do. В немецком так до сих пор: «Magst du…?» — отсюда путаница у тех, кто учил немецкий.",[]],
+    ["obs","Наблюдение","Два do подряд — это нормально","What do you do? Первый do — помощник, второй — глагол «делать». Это самый частый вопрос при знакомстве.",["What do you do?"]],
+    ["obs","Наблюдение","How do you do? — не вопрос","Это старинное формальное «здравствуйте». Отвечают тем же: «How do you do?» Спрашивать о делах — How are you?",["How do you do?"]],
+    ["obs","Наблюдение","В разговоре do пропадает","Друзья говорят: «You want some tea?», «You like it?» — с интонацией вопроса. Это нормально в живой речи, но с незнакомыми и в письме — полная форма.",["You want some tea?"]],
+    ["hack","Лайфхак","Проверь через ответ","Подставь краткий ответ. Звучит «Yes, I do» — вопрос с do. Звучит «Yes, I am» — с be.",[]],
+    ["hack","Лайфхак","Like или would like","Do you like coffee? — любишь вообще. Would you like a coffee? — хочешь прямо сейчас. Второе — это предложение, а не вопрос о вкусах.",["Would you like a coffee?"]],
+    ["hack","Лайфхак","Готовые фразы с does it","Выучи целиком: Does it hurt? (Болит?) Does it work? (Работает?) Does it matter? (Это важно?) Does it make sense? (Понятно?)",["Does it make sense?","Does it matter?"]],
+    ["hack","Лайфхак","Do you know…? — универсальный старт","Не знаешь, как спросить напрямую? Начни с Do you know + вопрос: Do you know where the station is? Подробно — в модуле 13.",["Do you know where the station is?"]]
+    ].map(([k,lab,h,p,exs])=>`<div class="tip tip-${k}"><span class="pill">${lab}</span><h3>${h}</h3><p>${p}</p>${exs.map(e=>`<div>${ex(e)}</div>`).join("")}</div>`).join("")}</div>`},
+  {id:"errors",title:"Типичные ошибки",body:`
+    <div class="errs">${errs.map(([n,y,w])=>`<div class="err"><span class="no">${esc(n)}</span><span class="yes">${esc(y)}</span><span class="why">${esc(w)}</span></div>`).join("")}</div>`}
+  ];
+};
+CONTENT.m1.title = "Вопросы с to be";
+CONTENT.m1.idea = "В вопросе форма be прыгает вперёд — перед подлежащим. Никакого do.";
+const CAT_SEC = {order:"formula",aux_missing:"formula",be_form:"forms",do_be:"traps",be_verb:"traps",wh:"wh",article:"errors",short:"short",other:"formula"};
+
+function secHTML(s){ return `<section class="card lesson-sec" data-sec="${s.id}"><h2>${s.title}</h2>${s.body}</section>`; }
+function tocHTML(secs,lesson){
+  const items=secs.map(s=>[s.id,s.title]); if(lesson){ items.splice(2,0,["demo","Анимация"]); items.push(["check","Мини-проверка"]); }
+  return `<nav class="toc" aria-label="Содержание">${items.map(([id,t])=>`<button data-act="toc" data-sec="${id}">${t}</button>`).join("")}</nav>`;
+}
+function demoHTML(){ return `<section class="card lesson-sec" data-sec="demo"><h2>Как утверждение становится вопросом</h2>
+    <div class="tabs" role="tablist">${curDemos().map((d,i)=>`<button class="tab" role="tab" aria-selected="${i===0}" data-act="demo-tab" data-i="${i}">${d.name}</button>`).join("")}</div>
+    <div class="demo-line" id="demo-line" aria-live="polite"></div>
+    <p class="demo-cap" id="demo-cap"></p>
+    <div class="row"><button class="btn" data-act="demo-prev" id="demo-prev">← Назад</button><button class="btn primary" data-act="demo-next" id="demo-next">Дальше →</button><span class="spacer"></span><span class="muted small" id="demo-step"></span></div>
+  </section>`; }
+function viewLesson(id){
+  MC={}; MCO={}; DEMO={i:0,k:0};
+  const C=CONTENT[id], secs=C.rules(), n=MODULES.findIndex(m=>m.id===id)+1, done=modState(id).lesson;
+  return `<section class="lesson-sec"><div class="eyebrow">Модуль ${n} · урок · около 15 минут</div><h1>${esc(C.title)}</h1>
+    <p class="big-idea">${esc(C.idea)}</p>${tocHTML(secs,true)}
+    ${done?`<div class="row"><button class="btn" data-act="train" data-id="${id}" data-mode="full">Сразу к тренажёру →</button></div>`:""}</section>
+  ${secs.map(s=>secHTML(s)+(s.id==="formula"?demoHTML():"")).join("")}
+  <section class="card lesson-sec" id="mc" data-sec="check"><h2>Мини-проверка</h2><p class="muted">Три вопроса — и можно в тренажёр.</p>
+    <div id="mc-body">${mcHTML(C)}</div></section>`;
+}
+function openRule(secId){
+  const s=S.sess; if(!s) return;
+  const rmid=(T&&T.t&&T.t.mid)||s.mid, C=CONTENT[rmid], secs=C.rules();
+  $("#drawer-title").textContent="Правило: "+C.title;
+  $("#drawer-body").innerHTML=`<p class="big-idea" style="font-size:1.05rem">${esc(C.idea)}</p>${tocHTML(secs,false)}${secs.map(secHTML).join("")}
+    <div class="row"><button class="btn" data-act="lesson" data-id="${rmid}">Открыть полный урок с анимацией</button><span class="muted small">Прогресс в тренажёре сохранится</span></div>`;
+  const d=$("#drawer"); d.hidden=false; document.body.classList.add("lock");
+  const panel=d.querySelector(".drawer-panel"); panel.scrollTop=0;
+  if(secId){ const el=panel.querySelector(`[data-sec="${secId}"]`); if(el) el.scrollIntoView({block:"start"}); }
+  $("#drawer-close").focus();
+}
+function closeRule(){ const d=$("#drawer"); if(d.hidden) return; d.hidden=true; document.body.classList.remove("lock"); const inp=$("#ans"); if(inp&&!inp.disabled) inp.focus(); }
+function mcHTML(C){
+  const allDone=C.check.every((_,i)=>MC[i]&&MC[i].done);
+  return C.check.map((q,i)=>{ const st=MC[i]||{wrong:[],done:false}, ord=MCO[i]||(MCO[i]=shuffle(q.opts.map((_,j)=>j)));
+    return `<div class="mc"><div class="prompt-en" style="font-size:1.05rem">${esc(q.q).replace("___",`<span class="blank">${st.done&&q.q.includes("___")?esc(q.opts[q.ans]):"&nbsp;"}</span>`)}</div>
+      <div class="opts">${ord.map(j=>{ const o=q.opts[j]; return `<button class="opt ${st.wrong.includes(j)?"wrong":""} ${st.done&&j===q.ans?"right":""}" data-act="mc" data-q="${i}" data-o="${j}" ${st.done||st.wrong.includes(j)?"disabled":""}>${esc(o)}</button>`; }).join("")}</div>
+      ${st.wrong.length&&!st.done?`<div class="fb warn"><span>${esc(q.hint)}</span></div>`:""}
+      ${st.done?`<div class="small" style="color:var(--ok)">${st.wrong.length?"Верно, со второй попытки.":"Верно!"}</div>`:""}</div>`; }).join("")+
+    `<div class="row" style="padding-top:10px"><button class="btn primary" data-act="train" data-id="${C.id}" data-mode="full" ${allDone?"":"disabled"}>Начать тренажёр: 50 заданий</button>${allDone?`<button class="btn" data-act="lesson-restart">Пройти урок ещё раз</button>`:`<span class="muted small">Ответь на все три вопроса</span>`}</div>`;
+}
+function mcPick(qi,oi){
+  const C=CONTENT[ARG], q=C.check[qi], st=MC[qi]||(MC[qi]={wrong:[],done:false});
+  if(st.done) return;
+  if(oi===q.ans){ st.done=true; beep(); } else if(!st.wrong.includes(oi)) st.wrong.push(oi);
+  if(C.check.every((_,i)=>MC[i]&&MC[i].done)){ modState(ARG).lesson=true; touchDay(); save(); updateTop(); }
+  $("#mc-body").innerHTML=mcHTML(C);
+}
+function drawDemo(animate){
+  const line=$("#demo-line"); if(!line) return;
+  const d=curDemos()[DEMO.i], fr=d.frames[DEMO.k];
+  const prev={}; if(animate) line.querySelectorAll("[data-k]").forEach(el=>prev[el.dataset.k]=el.getBoundingClientRect());
+  line.innerHTML=fr.t.map(([k,txt,tag,st])=>`<span class="tok t-${tag} ${st||""}" data-k="${k}">${esc(txt)}</span>`).join("");
+  $("#demo-cap").innerHTML=fr.c;
+  $("#demo-step").textContent=`Шаг ${DEMO.k+1} из ${d.frames.length}`;
+  $("#demo-prev").disabled=DEMO.k===0;
+  $("#demo-next").textContent=DEMO.k===d.frames.length-1?"Сначала ↺":"Дальше →";
+  document.querySelectorAll(".tab").forEach((b,i)=>b.setAttribute("aria-selected",i===DEMO.i));
+  if(!animate || matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) return;
+  line.querySelectorAll("[data-k]").forEach(el=>{ const p=prev[el.dataset.k], r=el.getBoundingClientRect();
+    if(p){ const dx=p.left-r.left, dy=p.top-r.top; if(dx||dy) el.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],{duration:520,easing:"cubic-bezier(.2,.8,.2,1)"}); }
+    else el.animate([{opacity:0,transform:"translateY(-10px) scale(.9)"},{opacity:1,transform:"none"}],{duration:380,easing:"ease-out"}); });
+}
+
+/* ---- trainer ---- */
+function examIds(){
+  const ids=[];
+  for(const m of MODULES){ const C=CONTENT[m.id]; if(C) ids.push(...shuffle(C.tasks.map(t=>t.id)).slice(0,3)); }
+  const rest=shuffle(Object.keys(TASKS).filter(id=>!ids.includes(id)));
+  while(ids.length<50 && rest.length) ids.push(rest.pop());
+  return shuffle(ids).slice(0,50);
+}
+function startTrain(mid,mode){
+  const C=CONTENT[mid]; if(!C && mid!=="exam") return;
+  let s=S.sess;
+  if(!(s && s.mid===mid && s.mode===mode && s.i<s.ids.length)){
+    const ids = mid==="exam" ? examIds() : mode==="mistakes" ? [...(S.bank[mid]||[])] : C.tasks.map(t=>t.id);
+    if(!ids.length) return;
+    s=S.sess={mid,mode,ids,i:0,res:{},cats:{},xp:0};
+  }
+  save(); go("train");
+}
+function viewTrain(){
+  const s=S.sess, t0=TASKS[s.ids[s.i]];
+  return `<section class="train-head"><div class="row"><div><div class="eyebrow">${s.mode==="mistakes"?"Работа над ошибками":s.mode==="exam"?"Экзамен · задание из модуля "+(MODULES.findIndex(x=>x.id===(t0||{}).mid)+1):"Тренажёр"}</div><h2 style="margin-top:2px">${esc(modTitle(s.mid))}</h2></div><span class="spacer"></span>
+    <button class="btn" data-act="rule">К правилу</button><span class="pill acc" id="counter"></span></div><div class="strip" id="strip" aria-hidden="true"></div></section>
+    <section class="card task" id="card"></section>
+    <p class="kbd-hint">Enter — проверить / дальше. В заданиях с выбором — клавиши 1–4.</p>`;
+}
+function updateStrip(){
+  const s=S.sess; if(!s) return;
+  $("#strip").innerHTML=s.ids.map((id,i)=>{ const r=s.res[id]; return `<i class="${r==="first"?"f":r==="hint"?"h":r==="shown"?"s":i===s.i?"cur":""}"></i>`; }).join("");
+  $("#counter").textContent=`${Math.min(s.i+1,s.ids.length)} / ${s.ids.length}`;
+}
+function shuffle(a){ a=[...a]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function mountTask(){
+  const s=S.sess, t=TASKS[s.ids[s.i]];
+  T={t,order:t.opts?shuffle(t.opts.map((_,j)=>j)):[],attempts:0,stage:0,hinted:false,done:false,result:null,wrongOpts:[],picked:[],chips:[],msg:null,firstCat:null,typo:null,alt:false};
+  if(t.type==="build"){
+    const words=parseF(t.f).map(x=>x.text).join(" ").split(" ").map(w=>w==="I"?w:w.toLowerCase());
+    T.chips=shuffle(words.concat(t.extra||[]));
+  }
+  const card=$("#card");
+  let prompt="";
+  if(t.type==="build"||t.type==="tr") prompt=`<p class="prompt-ru">«${esc(t.ru)}»</p>`;
+  else if(t.type==="choose") prompt=`<p class="prompt-en" id="ch-q"></p>`;
+  else if(t.type==="fix") prompt=`${t.ctx?`<p class="muted small">${esc(t.ctx)}</p>`:""}<p class="prompt-en"><span class="wrong">${esc(t.wrong)}</span></p>`;
+  else if(t.type==="react") prompt=`<p class="muted small">Собеседник говорит:</p><p class="prompt-en">«${esc(t.say)}»</p><p class="about">${esc(t.about)}</p>`;
+  else if(t.type==="focus") prompt=`<p class="prompt-en">${esc(t.s).replace(/\{(.+?)\}/,"<mark>$1</mark>")}</p>${t.about?`<p class="about">${esc(t.about)}</p>`:""}`;
+  else if(t.type==="answer") prompt=`<p class="muted small">Тебе ответили:</p><p class="prompt-en">«${esc(t.reply)}»</p><p class="about">${esc(t.about)}</p>`;
+  card.innerHTML=`<div class="task-type"><span class="eyebrow">${t.label||TYPE_LABEL[t.type]}</span><span class="muted small">+10 XP с первой попытки</span></div>
+    <div>${prompt}</div><div id="ia"></div><div id="fb" aria-live="polite"></div><div class="actions" id="act"></div>`;
+  card.classList.remove("shake");
+  renderIA(); renderFB(); renderAct(); updateStrip();
+  const inp=$("#ans"); if(inp){ inp.focus(); if(t.type==="fix") inp.setSelectionRange(inp.value.length,inp.value.length); }
+}
+function renderIA(){
+  const t=T.t, ia=$("#ia");
+  if(t.type==="choose"){
+    const q=$("#ch-q"); if(q) q.innerHTML=esc(t.q).replace("___",`<span class="blank">${T.done?esc(t.opts[t.ans]):"&nbsp;"}</span>`);
+    ia.innerHTML=`<div class="opts">${T.order.map((j,pos)=>{ const o=t.opts[j]; return `<button class="opt ${T.wrongOpts.includes(j)?"wrong":""} ${T.done&&j===t.ans?"right":""}" data-act="opt" data-o="${j}" ${T.done||T.wrongOpts.includes(j)?"disabled":""}><kbd>${pos+1}</kbd>${esc(o)}</button>`; }).join("")}</div>`;
+  } else if(t.type==="build"){
+    ia.innerHTML=`<div class="chip-zone ${T.picked.length?"filled":""}" id="zone">${T.picked.length?T.picked.map((ci,k)=>`<button class="chip" data-act="unchip" data-k="${k}" ${T.done?"disabled":""}>${esc(T.chips[ci])}</button>`).join(""):`<span class="zone-ph">Нажимай на слова ниже по порядку</span>`}</div>
+      <div class="chip-bank" style="margin-top:12px">${T.chips.map((w,ci)=>`<button class="chip ${T.picked.includes(ci)?"ghost":""}" data-act="chip" data-c="${ci}" ${T.done||T.picked.includes(ci)?"disabled":""}>${esc(w)}</button>`).join("")}</div>`;
+  } else {
+    if(!$("#ans")) ia.innerHTML=`<input class="inp" id="ans" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${t.type==="fix"?"Исправь":t.type==="react"?"Напиши реакцию по-английски":"Напиши вопрос по-английски"}" value="${t.type==="fix"?esc(t.wrong):""}">`;
+    $("#ans").disabled=T.done;
+  }
+}
+function formulaHint(t){
+  return `<div class="formula">${parseF(t.f).map((s,i)=>{ const hide=s.tag==="a"||s.tag==="v";
+    const txt=hide?"?":(i===0?cap(s.text):s.text); return slot(s.tag,esc(txt),SEG_LABEL[s.tag]).replace('class="tok','class="tok'+(hide?" mask":"")); }).join("")}<span class="plus">${t.end||"?"}</span></div>`;
+}
+function ruleLink(cat){
+  const id=(CONTENT[T.t.mid].catSec||CAT_SEC)[cat]||"formula", sec=CONTENT[T.t.mid].rules().find(s=>s.id===id);
+  return sec ? `<button class="linkbtn small" data-act="rule" data-sec="${id}">Правило: ${esc(sec.title)} →</button>` : "";
+}
+function renderFB(){
+  const t=T.t, fb=$("#fb");
+  if(T.done){
+    const main=mainText(t);
+    const head = T.result==="first" ? "Верно!" : T.result==="hint" ? "Верно, с подсказкой" : "Правильный ответ";
+    const notes=[];
+    if(T.typo) notes.push(`Засчитано, но есть опечатка: <b>${esc(T.typo.from)}</b> → <b>${esc(T.typo.to)}</b>.`);
+    if(T.alt) notes.push("Твой вариант тоже правильный. Основной вариант:");
+    if(T.result==="shown") notes.push(esc(t.hint));
+    fb.innerHTML=`<div class="fb ${T.result==="shown"?"shown":"ok"}"><div class="fb-head">${head}</div>
+      ${notes.map(n=>`<p class="small">${n}</p>`).join("")}
+      <div class="ans-line">${tokensHTML(t)}${sayBtn(main)}</div>
+      <p class="muted small">${esc(t.ru)}</p>
+      ${T.result!=="first"?ruleLink(T.cat):""}
+      ${t.alt&&t.alt.length?`<div class="alts"><div class="eyebrow">${t.end?"Можно ответить иначе":"Можно спросить иначе"}</div>${t.alt.map(([en,lab])=>`<div class="alt">${sayBtn(en)}<span class="en">${esc(en)}</span><span class="pill">${esc(lab)}</span></div>`).join("")}</div>`:""}
+    </div>`;
+    return;
+  }
+  let h="";
+  if(T.msg) h+=`<div class="fb warn"><div class="fb-head">${T.attempts?"Пока не так":"Подсказка"}</div><p>${esc(T.msg)}</p>
+    ${T.stage>=2&&t.type!=="choose"?`<p class="small muted">Формула ответа:</p>${formulaHint(t)}${T.msg!==t.hint?`<p class="small">${esc(t.hint)}</p>`:""}`:""}
+    ${ruleLink(T.cat)}</div>`;
+  fb.innerHTML=h;
+}
+function renderAct(){
+  const t=T.t, a=$("#act");
+  if(T.done){ const last=S.sess.i>=S.sess.ids.length-1; a.innerHTML=`<button class="btn primary" data-act="next" id="next-btn">${last?"Результаты →":"Дальше →"}</button>`; $("#next-btn").focus(); return; }
+  const hintLabel = t.type==="choose" ? "Подсказка" : T.stage===0 ? "Подсказка" : T.stage===1 ? "Ещё подсказка" : "Показать ответ";
+  a.innerHTML=`${t.type!=="choose"?`<button class="btn primary" data-act="check">Проверить</button>`:""}
+    ${t.type==="build"?`<button class="btn" data-act="reset-chips">Сбросить</button>`:""}
+    <span class="spacer"></span><button class="btn ghost" data-act="hint">${hintLabel}</button>`;
+}
+function shake(){ const c=$("#card"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake"); }
+function check(){
+  if(T.done) return next();
+  const t=T.t;
+  const raw = t.type==="build" ? T.picked.map(i=>T.chips[i]).join(" ") : ($("#ans")||{}).value||"";
+  if(!norm(raw)){ T.msg=t.type==="build"?"Сначала собери вопрос из слов.":"Сначала напиши вопрос."; renderFB(); return; }
+  if(t.type==="fix" && norm(raw)===norm(t.wrong)){ T.msg="Это исходный вариант с ошибкой. Найди, что в нём не так, и исправь."; renderFB(); shake(); return; }
+  const m=match(t,raw);
+  if(m.ok){ T.typo=m.typo||null; T.alt=!!m.alt; finish(T.attempts===0&&!T.hinted?"first":"hint"); return; }
+  T.attempts++;
+  const d=diagnose(t,raw);
+  if(!T.firstCat) T.firstCat=d.cat;
+  T.cat=d.cat;
+  T.stage=Math.max(T.stage,Math.min(T.attempts,3));
+  T.msg=d.msg;
+  if(T.stage>=3){ finish("shown"); return; }
+  renderFB(); renderAct(); shake();
+}
+function hint(){
+  if(T.done) return;
+  const t=T.t; T.hinted=true;
+  if(t.type==="choose"){ T.msg=t.hint; renderFB(); return; }
+  if(T.stage>=2){ finish("shown"); return; }
+  T.stage++; if(T.stage===1||!T.msg) T.msg=t.hint;
+  renderFB(); renderAct();
+}
+function pickOpt(i){
+  const t=T.t; if(T.done||T.wrongOpts.includes(i)||t.type!=="choose") return;
+  if(i===t.ans){ finish(T.attempts===0&&!T.hinted?"first":"hint"); return; }
+  T.attempts++; T.wrongOpts.push(i);
+  if(!T.firstCat) T.firstCat=t.cat||"other";
+  T.cat=t.cat||"other";
+  T.msg=(t.why&&t.why[i])||t.hint;
+  if(T.attempts>=2){ finish("shown"); return; }
+  renderIA(); renderFB(); shake();
+}
+function finish(r){
+  T.done=true; T.result=r;
+  const s=S.sess; s.res[T.t.id]=r;
+  if(T.firstCat && r!=="first") s.cats[T.firstCat]=(s.cats[T.firstCat]||0)+1;
+  const gain=r==="first"?10:r==="hint"?5:0; s.xp+=gain; S.xp+=gain; touchDay();
+  const bm=T.t.mid, bank=S.bank[bm]||(S.bank[bm]=[]);
+  if(r==="first"){ if(s.mode==="mistakes"){ const k=bank.indexOf(T.t.id); if(k>=0) bank.splice(k,1); } }
+  else if(!bank.includes(T.t.id)) bank.push(T.t.id);
+  save(); if(r!=="shown") beep();
+  renderIA(); renderFB(); renderAct(); updateStrip(); updateTop();
+}
+function next(){
+  const s=S.sess; s.i++;
+  if(s.i>=s.ids.length){
+    const first=Object.values(s.res).filter(x=>x==="first").length;
+    if(s.mode==="full"){ const st=modState(s.mid); st.best=Math.max(st.best||0,first); st.runs++; }
+    if(s.mode==="exam") S.examBest=Math.max(S.examBest||0,first);
+    S.last={...s, first}; S.sess=null; save(); go("results"); return;
+  }
+  save(); mountTask(); window.scrollTo({top:0,behavior:"smooth"});
+}
+function viewResults(){
+  const r=S.last; if(!r) return viewMap();
+  if(r.mode==="exam") return viewExamResults(r);
+  const m={t:modTitle(r.mid)}, n=r.ids.length, vals=Object.values(r.res);
+  const first=vals.filter(x=>x==="first").length, hinted=vals.filter(x=>x==="hint").length, shown=vals.filter(x=>x==="shown").length;
+  const cats=Object.entries(r.cats).sort((a,b)=>b[1]-a[1]); const max=cats.length?cats[0][1]:1;
+  const bank=(S.bank[r.mid]||[]).length, pass=r.mode==="full"&&first>=Math.ceil(n*.8);
+  return `<section class="lesson-sec"><div class="eyebrow">${r.mode==="mistakes"?"Работа над ошибками":"Результат"} · ${esc(m.t)}</div>
+    <h1>${first===n?"Идеально!":pass?"Модуль пройден":"Хорошая работа"}</h1>
+    <p class="muted">${r.mode==="full"?(pass?"80% с первой попытки — следующий модуль можно начинать.":"Чтобы модуль засчитался, нужно 80% с первой попытки (40 из 50)."):"Задания, решённые с первой попытки, убраны из банка ошибок."}</p></section>
+  <section class="card"><div class="score">
+    <div><span class="muted small">С первой попытки</span><b style="color:var(--ok)">${first} / ${n}</b></div>
+    <div><span class="muted small">С подсказкой</span><b style="color:var(--warn)">${hinted}</b></div>
+    <div><span class="muted small">Показан ответ</span><b style="color:var(--bad)">${shown}</b></div>
+    <div><span class="muted small">Получено</span><b>${r.xp} XP</b></div></div></section>
+  ${cats.length?`<section class="card lesson-sec"><h2>Где ошибался</h2>
+    ${cats.map(([c,k])=>`<div class="catrow"><span>${CAT_LABEL[c]||c}</span><div class="bar"><i style="width:${k/max*100}%"></i></div><span>${k}</span></div>`).join("")}
+    <div class="fb warn"><div class="fb-head">Совет</div><p>${esc((CONTENT[r.mid].tips||{})[cats[0][0]]||CAT_TIP[cats[0][0]]||CAT_TIP.other)}</p></div></section>`:""}
+  <div class="row">${bank?`<button class="btn primary" data-act="train" data-id="${r.mid}" data-mode="mistakes">Повторить ошибки (${bank})</button>`:""}
+    <button class="btn ${bank?"":"primary"}" data-act="train" data-id="${r.mid}" data-mode="full">Пройти заново</button>
+    <button class="btn" data-act="lesson" data-id="${r.mid}">Пройти урок ещё раз</button>
+    <button class="btn ghost" data-act="home">На карту</button></div>`;
+}
+
+/* ---- exam results ---- */
+function viewExamResults(r){
+  const n=r.ids.length, vals=Object.values(r.res), first=vals.filter(x=>x==="first").length;
+  const rows=MODULES.map((m,i)=>{ const ids=r.ids.filter(id=>TASKS[id]&&TASKS[id].mid===m.id); const ok=ids.filter(id=>r.res[id]==="first").length; return {m,i,total:ids.length,ok}; }).filter(x=>x.total);
+  const weak=rows.filter(x=>x.ok<x.total).sort((a,b)=>a.ok/a.total-b.ok/b.total).slice(0,4);
+  const pass=first>=40;
+  return `<section class="lesson-sec"><div class="eyebrow">Итоговый экзамен · результат</div>
+    <h1>${first===n?"Идеально!":pass?"Экзамен сдан":"Почти получилось"}</h1>
+    <p class="muted">${pass?"40 и больше с первой попытки — ты уверенно задаёшь вопросы всех типов.":"Чтобы сдать экзамен, нужно 40 из 50 с первой попытки. Ниже — какие темы стоит повторить."}</p></section>
+  <section class="card"><div class="score">
+    <div><span class="muted small">С первой попытки</span><b style="color:var(--ok)">${first} / ${n}</b></div>
+    <div><span class="muted small">Лучший результат</span><b>${S.examBest||first} / 50</b></div>
+    <div><span class="muted small">Получено</span><b>${r.xp} XP</b></div></div></section>
+  <section class="card lesson-sec"><h2>По модулям</h2>
+    ${rows.map(x=>`<div class="catrow"><span>${x.i+1}. ${esc(x.m.t)}</span><div class="bar"><i style="width:${x.ok/x.total*100}%;background:${x.ok===x.total?"var(--ok)":"var(--warn)"}"></i></div><span>${x.ok}/${x.total}</span></div>`).join("")}</section>
+  ${weak.length?`<section class="card lesson-sec"><h2>Что повторить</h2><div class="row">${weak.map(x=>`<button class="btn" data-act="lesson" data-id="${x.m.id}">Урок ${x.i+1}: ${esc(x.m.t)}</button>`).join("")}</div></section>`:""}
+  <div class="row"><button class="btn primary" data-act="train" data-id="exam" data-mode="exam">Сдать ещё раз</button><button class="btn ghost" data-act="home">На карту</button></div>`;
+}
+
+/* ---- placement test ---- */
+let PL=null;
+function startPlacement(){
+  PL={i:0,answers:[],picked:null,qs:MODULES.filter(m=>CONTENT[m.id]).map(m=>({mid:m.id,q:CONTENT[m.id].check[2]}))};
+  PL.qs.forEach(x=>x.ord=shuffle(x.q.opts.map((_,j)=>j)));
+  go("placement");
+}
+function plPick(j){
+  if(!PL||PL.picked!=null||PL.i>=PL.qs.length) return;
+  const cur=PL.qs[PL.i]; PL.picked=j; PL.answers[PL.i]=(j===cur.q.ans);
+  if(PL.answers[PL.i]) beep();
+  render();
+}
+function plNext(){
+  if(!PL||PL.picked==null) return;
+  PL.i++; PL.picked=null;
+  if(PL.i>=PL.qs.length){
+    const wrong=PL.qs.findIndex((x,k)=>!PL.answers[k]);
+    const start=wrong===-1?"exam":PL.qs[wrong].mid;
+    PL.qs.forEach((x,k)=>{ modState(x.mid).placed = (wrong===-1||k<wrong); });
+    S.placement={start,score:PL.answers.filter(Boolean).length,answers:PL.answers.slice()}; touchDay(); save();
+  }
+  render(); window.scrollTo(0,0);
+}
+function viewPlacement(){
+  if(!PL) return viewMap();
+  const total=PL.qs.length;
+  if(PL.i>=total){
+    const st=S.placement, sIdx=MODULES.findIndex(x=>x.id===st.start);
+    return `<section class="lesson-sec"><div class="eyebrow">Вводный тест · результат</div>
+      <h1>${st.start==="exam"?"Ты знаешь все темы":"Начни с модуля "+(sIdx+1)}</h1>
+      <p class="muted">${st.start==="exam"?"Все 16 ответов верные. Проверь себя на итоговом экзамене — там задания сложнее.":`Правильно: ${st.score} из ${total}. Модули до ${sIdx+1}-го ты уже знаешь — они отмечены на карте. Начни с «${esc(modTitle(st.start))}». Ошибки в следующих модулях разберёшь по ходу.`}</p></section>
+    <section class="card lesson-sec"><h2>Ответы по модулям</h2>
+      ${PL.qs.map((x,k)=>`<div class="catrow"><span>${MODULES.findIndex(m=>m.id===x.mid)+1}. ${esc(modTitle(x.mid))}</span><span class="pill ${PL.answers[k]?"ok":"warn"}" style="justify-self:start">${PL.answers[k]?"верно":"стоит пройти"}</span><span></span></div>`).join("")}</section>
+    <div class="row">${st.start==="exam"?`<button class="btn primary" data-act="train" data-id="exam" data-mode="exam">Начать экзамен</button>`:`<button class="btn primary" data-act="lesson" data-id="${st.start}">Открыть урок ${sIdx+1}</button>`}<button class="btn ghost" data-act="home">На карту</button></div>`;
+  }
+  const cur=PL.qs[PL.i], q=cur.q, n=MODULES.findIndex(m=>m.id===cur.mid)+1, done=PL.picked!=null;
+  const blank=q.q.includes("___")?esc(q.q).replace("___",`<span class="blank">${done?esc(q.opts[q.ans]):"&nbsp;"}</span>`):esc(q.q);
+  return `<section class="train-head"><div class="row"><div><div class="eyebrow">Вводный тест · модуль ${n}</div><h2 style="margin-top:2px">${esc(modTitle(cur.mid))}</h2></div><span class="spacer"></span><span class="pill acc">${PL.i+1} / ${total}</span></div>
+    <div class="strip" aria-hidden="true">${PL.qs.map((_,k)=>`<i class="${k<PL.i?(PL.answers[k]?"f":"s"):k===PL.i?"cur":""}"></i>`).join("")}</div></section>
+  <section class="card task"><div class="task-type"><span class="eyebrow">Выбери правильный вариант</span><span class="muted small">Без подсказок — отвечай, как знаешь</span></div>
+    <p class="prompt-en">${blank}</p>
+    <div class="opts">${cur.ord.map((j,pos)=>`<button class="opt ${done&&j===q.ans?"right":""} ${done&&j===PL.picked&&j!==q.ans?"wrong":""}" data-act="pl" data-o="${j}" ${done?"disabled":""}><kbd>${pos+1}</kbd>${esc(q.opts[j])}</button>`).join("")}</div>
+    ${done?`<div class="fb ${PL.answers[PL.i]?"ok":"warn"}"><div class="fb-head">${PL.answers[PL.i]?"Верно!":"Не совсем"}</div><p class="small">${esc(q.hint)}</p></div>
+    <div class="actions"><button class="btn primary" data-act="pl-next" id="pl-next">${PL.i===total-1?"Результат →":"Дальше →"}</button></div>`:""}
+  </section>
+  <p class="kbd-hint">Клавиши 1–3 — выбрать ответ, Enter — дальше.</p>`;
+}
+
+/* ============ EVENTS ============ */
+document.addEventListener("click",e=>{
+  const dr=$("#drawer"); if(e.target===dr){ closeRule(); return; }
+  const b=e.target.closest("[data-act]"); if(!b||b.disabled) return;
+  const act=b.dataset.act;
+  if(["home","lesson","train"].includes(act)) closeRule();
+  if(act==="home") go("map");
+  else if(act==="lesson") go("lesson",b.dataset.id);
+  else if(act==="lesson-restart") go("lesson",ARG);
+  else if(act==="train") startTrain(b.dataset.id,b.dataset.mode||"full");
+  else if(act==="rule") openRule(b.dataset.sec);
+  else if(act==="close-rule") closeRule();
+  else if(act==="toc"){ const scope=b.closest(".drawer-panel")||document; const el=scope.querySelector(`section[data-sec="${b.dataset.sec}"]`); if(el) el.scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"}); }
+  else if(act==="sound"){ S.sound=!S.sound; save(); updateTop(); }
+  else if(act==="say") say(b.dataset.say);
+  else if(act==="demo-tab"){ DEMO={i:+b.dataset.i,k:0}; drawDemo(false); }
+  else if(act==="demo-next"){ const n=curDemos()[DEMO.i].frames.length; if(DEMO.k<n-1){ DEMO.k++; drawDemo(true); } else { DEMO.k=0; drawDemo(false); } }
+  else if(act==="demo-prev"){ if(DEMO.k>0){ DEMO.k--; drawDemo(true); } }
+  else if(act==="mc") mcPick(+b.dataset.q,+b.dataset.o);
+  else if(act==="opt") pickOpt(+b.dataset.o);
+  else if(act==="chip"){ T.picked.push(+b.dataset.c); T.msg=T.attempts?T.msg:null; renderIA(); }
+  else if(act==="unchip"){ T.picked.splice(+b.dataset.k,1); renderIA(); }
+  else if(act==="reset-chips"){ T.picked=[]; renderIA(); }
+  else if(act==="check") check();
+  else if(act==="hint") hint();
+  else if(act==="next") next();
+  else if(act==="placement") startPlacement();
+  else if(act==="pl") plPick(+b.dataset.o);
+  else if(act==="pl-next") plNext();
+});
+document.addEventListener("keydown",e=>{
+  if(!$("#drawer").hidden){ if(e.key==="Escape") closeRule(); return; }
+  if(VIEW==="placement" && PL && PL.i<PL.qs.length){ const cur=PL.qs[PL.i];
+    if(e.key==="Enter" && PL.picked!=null){ e.preventDefault(); plNext(); }
+    else if(/^[1-4]$/.test(e.key) && PL.picked==null && cur.ord[+e.key-1]!=null) plPick(cur.ord[+e.key-1]);
+    return; }
+  if(VIEW!=="train"||!T) return;
+  if(e.key==="Enter"){ e.preventDefault(); if(T.done) next(); else if(T.t.type!=="choose") check(); return; }
+  if(T.t.type==="choose" && !T.done && /^[1-4]$/.test(e.key)){ const i=+e.key-1; if(i<T.order.length) pickOpt(T.order[i]); }
+  if(T.t.type==="build" && !T.done && e.key==="Backspace" && T.picked.length){ e.preventDefault(); T.picked.pop(); renderIA(); }
+});
+
+function tipsHTML(list){ return `<div class="tips">${list.map(([k,h,p,exs])=>`<div class="tip tip-${k}"><span class="pill">${{mem:"Запоминалка",obs:"Наблюдение",hack:"Лайфхак"}[k]}</span><h3>${h}</h3><p>${p}</p>${(exs||[]).map(e=>`<div>${ex(e)}</div>`).join("")}</div>`).join("")}</div>`; }
+function errsHTML(list){ return `<div class="errs">${list.map(([n,y,w])=>`<div class="err"><span class="no">${esc(n)}</span><span class="yes">${esc(y)}</span><span class="why">${esc(w)}</span></div>`).join("")}</div>`; }
+const strike = s => `<span class="mono" style="color:var(--bad);text-decoration:line-through">${esc(s)}</span>`;
+const mn = s => `<span class="mono">${s}</span>`;
+function boot(){
+  for (const mid in CONTENT){ const C=CONTENT[mid]; C.id=mid;
+    (C.tasks||[]).forEach((t,i)=>{ t.id=mid+"-"+(i+1); t.mid=mid; TASKS[t.id]=t; });
+    for (const k in (C.cats||{})){ CAT_LABEL[k]=C.cats[k][0]; CAT_TIP[k]=C.cats[k][1]; } }
+  render();
+}
+document.addEventListener("DOMContentLoaded", boot);
+</script>
+<script src="modules/m3.js"></script>
+<script src="modules/m4.js"></script>
+<script src="modules/m5.js"></script>
+<script src="modules/m6.js"></script>
+<script src="modules/m7.js"></script>
+<script src="modules/m8.js"></script>
+<script src="modules/m9.js"></script>
+<script src="modules/m10.js"></script>
+<script src="modules/m11.js"></script>
+<script src="modules/m12.js"></script>
+<script src="modules/m13.js"></script>
+<script src="modules/m14.js"></script>
+<script src="modules/m15.js"></script>
+<script src="modules/m16.js"></script>
+
+</body>
+</html>
