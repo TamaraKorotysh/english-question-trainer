@@ -346,7 +346,21 @@ CONTENT.m1 = {
   {type:"build",f:"q:Where|a:were|s:you|v:born",ru:"Где ты родился?",extra:["did","was"],hint:"«Родиться» по-английски — be born. Поэтому were, а не did: Where were you born?",alt:[["Where are you from originally?","разговорно"],["What's your place of birth?","официально, анкета"]]},
   {type:"tr",ru:"Он был на встрече?",f:"a:Was|s:he|o:at the meeting",acc:["Was he in the meeting"],hint:"Прошлое, he → was. «На встрече» = at the meeting.",alt:[["Did he come to the meeting?","через come — нужен did"],["Did he make it to the meeting?","разговорно: «успел ли»"]]},
   {type:"answer",reply:"Yes, we are. We love it here.",about:"Спроси, счастливы ли они здесь (you).",f:"a:Are|s:you|o:happy|t:here",ru:"Вы здесь счастливы?",acc:[],hint:"Ответ «Yes, we are» подсказывает помощник: Are + you + happy.",alt:[["Do you like it here?","через like — нужен do"],["How do you like it here?","разговорно"]]},
-  {type:"fix",wrong:"Was they at home?",f:"a:Were|s:they|o:at home",ru:"Они были дома?",acc:["Were they home"],hint:"they → were, а не was.",alt:[["Were they in?","брит., разговорно"],["Was anyone at home?","«кто-нибудь был дома?»"]]}
+  {type:"fix",wrong:"Was they at home?",f:"a:Were|s:they|o:at home",ru:"Они были дома?",acc:["Were they home"],hint:"they → were, а не was.",alt:[["Were they in?","брит., разговорно"],["Was anyone at home?","«кто-нибудь был дома?»"]]},
+  {type:"choose",q:"___ you tired? You've been working all day.",opts:["Are","Did","Do","Have"],ans:0,f:"a:Are|s:you|o:tired",ru:"Ты устал?",cat:"trap_adj",hint:"«Устал» по-русски — прошедшее время глагола, но по-английски это состояние: be tired.",why:{1:"Did you tire — так не говорят. Tired — прилагательное → be.",2:"tired — не глагол, do не подходит.",3:"Have you tired — так не говорят."},alt:[["You look tired.","утверждение"],["Long day?","разговорно"]]},
+  {type:"fix",wrong:"Did you tire after the trip?",f:"a:Were|s:you|o:tired|t:after the trip",ru:"Ты устал после поездки?",acc:["Are you tired after the trip"],hint:"«Устал» → be tired. О прошлом: Were you tired?",alt:[["Was the trip tiring?","про поездку: -ing"],["Did the trip wear you out?","разговорно"]]},
+  {type:"choose",q:"The lesson was really long. Were you ___?",opts:["bored","boring","bore","boredom"],ans:0,f:"a:Were|s:you|o:bored",ru:"Тебе было скучно?",cat:"edging",hint:"Что чувствуешь ты → -ed: bored. Boring — «скучный, занудный».",why:{1:"Were you boring? = «Ты был занудным?»",2:"bore — глагол «надоедать» или «зануда».",3:"boredom — существительное «скука»."},alt:[["Was it boring?","про урок: -ing"],["Did you enjoy it?","нейтрально"]]},
+  {type:"fix",ctx:"Хочешь спросить «Тебе скучно?», а получилось «Ты зануда?»",wrong:"Are you boring?",f:"a:Are|s:you|o:bored",ru:"Тебе скучно?",acc:[],hint:"Тебе скучно → Are you bored? А Are you boring? = «Ты зануда?»",alt:[["Is this boring you?","«тебе это надоело?»"],["Fancy doing something else?","предложение"]]},
+  {type:"tr",ru:"Тебе холодно?",f:"a:Are|s:you|o:cold",acc:[],hint:"«Тебе холодно» → «ты холодный»: человек становится подлежащим. Are you cold?",alt:[["Shall I close the window?","предложение"],["Do you want my jacket?","предложение"]]},
+  {type:"fix",ctx:"«Тебе холодно?»",wrong:"Is it cold for you?",f:"a:Are|s:you|o:cold",ru:"Тебе холодно?",acc:[],hint:"«Тебе холодно» → «ты холодный»: Are you cold?",alt:[["Are you warm enough?","«тебе тепло?»"],["Is it too cold in here?","про помещение"]]},
+  {type:"choose",q:"___ you agree to the new rules?",opts:["Do","Are","Is","Have"],ans:0,f:"a:Do|s:you|v:agree|o:to the new rules",ru:"Ты согласен с новыми правилами?",cat:"trap_verb",hint:"«Согласен» в английском — глагол agree → do. С правилами, планом — agree to.",why:{1:"Are you agree — главная ловушка: agree — глагол.",2:"you → не is, и нужен do.",3:"Have you agree — так не говорят."},alt:[["Are you OK with the new rules?","разговорно, через be"],["What do you think of the new rules?","специальный вопрос"]]},
+  {type:"tr",ru:"Тебе нужна помощь?",f:"a:Do|s:you|v:need|o:help",acc:["Do you need any help","Do you need some help"],hint:"«Нужна» в английском — глагол need («нуждаться»): Do you need help?",alt:[["Can I help you?","предложение"],["Need a hand?","разговорно"]]},
+  {type:"fix",ctx:"«Тебе это нужно?»",wrong:"Is it needed to you?",f:"a:Do|s:you|v:need|o:it",ru:"Тебе это нужно?",acc:[],hint:"«Тебе нужно» → «ты нуждаешься»: Do you need it?",alt:[["Do you still need it?","«ещё нужно?»"],["Can I take it?","«можно взять?»"]]},
+  {type:"choose",q:"___ you mind if I open the window?",opts:["Do","Are","Is","Have"],ans:0,f:"a:Do|s:you|v:mind|o:if I open the window",ru:"Вы не против, если я открою окно?",cat:"trap_verb",hint:"«Не против» в английском — глагол mind («возражать») → Do you mind…?",why:{1:"Are you mind — ловушка: mind — глагол.",2:"you → не is.",3:"Have you mind — так не говорят."},alt:[["Is it OK if I open the window?","разговорно, через be"],["Would you mind if I opened the window?","вежливее"]]},
+  {type:"tr",ru:"Ты не против?",f:"a:Do|s:you|v:mind",acc:["Would you mind"],hint:"«Не против» → Do you mind? Согласие — No, not at all (= «нет, не против»).",alt:[["Is that OK?","разговорно"],["Would you mind?","вежливее"]]},
+  {type:"build",f:"a:Are|s:you|o:lost",ru:"Вы заблудились?",extra:["did","lose"],hint:"«Заблудился» по-английски — состояние: Are you lost?",alt:[["Can I help you find something?","вежливо"],["Do you need directions?","«подсказать дорогу?»"]]},
+  {type:"answer",reply:"Yes, a bit. Can you turn up the heating?",about:"Спроси, холодно ли ей (you).",f:"a:Are|s:you|o:cold",ru:"Тебе холодно?",acc:[],hint:"«Тебе холодно» → Are you cold?",alt:[["Are you warm enough?","«тебе тепло?»"],["Shall I turn the heating up?","предложение"]]},
+  {type:"tr",ru:"Как ты себя чувствуешь?",f:"q:How|a:do|s:you|v:feel",acc:["How are you feeling","How are you"],hint:"По-английски без «себя»: How do you feel?",alt:[["How are you feeling?","Continuous: прямо сейчас"],["Are you feeling better?","если человек болел"]]}
   ]
 };
 CONTENT.m2 = {
@@ -584,7 +598,8 @@ function modStatus(m){
   if(!CONTENT[m.id]) return {pill:`<span class="pill">Скоро</span>`, pct:0};
   const st=modState(m.id), s=S.sess;
   if(s && s.mid===m.id && s.mode==="full") return {pill:`<span class="pill acc">${s.i} / ${s.ids.length}</span>`, pct:s.i/s.ids.length*100};
-  if(st.best!=null) return {pill:`<span class="pill ${st.best>=40?"ok":"warn"}">Лучший: ${st.best} / 50</span>`, pct:st.best/50*100};
+  const nT=CONTENT[m.id].tasks.length;
+  if(st.best!=null) return {pill:`<span class="pill ${st.best>=Math.ceil(nT*.8)?"ok":"warn"}">Лучший: ${st.best} / ${nT}</span>`, pct:st.best/nT*100};
   if(S.placement && S.placement.start===m.id) return {pill:`<span class="pill acc">Начни отсюда</span>`, pct:0};
   if(st.placed) return {pill:`<span class="pill ok">Знаешь (по тесту)</span>`, pct:0};
   if(st.lesson) return {pill:`<span class="pill acc">Урок пройден</span>`, pct:5};
@@ -609,7 +624,7 @@ function viewMap(){
     lv+=`</div></section>`;
   }
   return `<section class="hero"><h1>Учимся задавать вопросы</h1>
-    <p>16 модулей от простого к сложному. В каждом: урок с правилом, мини-проверка и 50 заданий с подсказками. После каждого ответа — другие способы спросить то же самое.</p>
+    <p>16 модулей от простого к сложному. В каждом: урок с правилом, мини-проверка и тренажёр от 50 заданий с подсказками. После каждого ответа — другие способы спросить то же самое.</p>
     <div class="legend"><span><i style="background:var(--q)"></i>вопросительное слово</span><span><i style="background:var(--a)"></i>помощник (be, do…)</span><span><i style="background:var(--s)"></i>подлежащее</span><span><i style="background:var(--v)"></i>глагол</span></div></section>
     ${resume}
     <section class="card resume"><div style="flex:1;min-width:200px"><div class="eyebrow">Вводный тест · 16 вопросов · 5 минут</div>
@@ -834,6 +849,25 @@ function m1Rules(){
   ];
 }
 CONTENT.m1.rules = m1Rules; CONTENT.m1.demos = DEMOS;
+CONTENT.m1.cats = {
+  trap_adj:["Слово-ловушка: состояние → be","«Устал, замёрз, заблудился» по-русски — глаголы, а по-английски — прилагательные: Are you tired / cold / lost?"],
+  trap_verb:["Слово-ловушка: глагол → do","«Согласен, нужен, не против» по-русски — состояние, а по-английски — глаголы: Do you agree / need / mind?"],
+  trap_dative:["«Мне холодно» → «я холодный»","В английском человек становится подлежащим: Are you cold? Do you need it? Не «Is it cold for you?»"],
+  edging:["bored или boring","-ed — что чувствуешь ты (bored, tired), -ing — какой ты для других (boring, tiring)."]};
+CONTENT.m1.diagnose = function({t,u,e,verb}){
+  const ED={bored:"boring",tired:"tiring",interested:"interesting",excited:"exciting",confused:"confusing",embarrassed:"embarrassing",surprised:"surprising",scared:"scary"};
+  for(const ed in ED){ if(e.includes(ed) && u.includes(ED[ed])) return {cat:"edging",msg:`-ed — что чувствуешь ты, -ing — какой ты для других. Are you ${ED[ed]}? звучит как «Ты ${ED[ed]==="boring"?"зануда":"такой "+ED[ed]}?». Нужно ${ed}.`}; }
+  if(u.includes("yourself") && !e.includes("yourself")) return {cat:"trap_dative",msg:"По-английски «себя» здесь не нужно: How do you feel? — без yourself."};
+  const us=u.join(" ");
+  if(/\b(for|to) (you|me)\b/.test(us) && !/\b(for|to) (you|me)\b/.test(e.join(" "))) return {cat:"trap_dative",msg:"«Тебе холодно / тебе нужно» по-английски строится от человека: ты холодный — Are you cold?, ты нуждаешься — Do you need it?"};
+  const ADJ={tired:"устал",cold:"замёрз / холодно",lost:"заблудился",hungry:"проголодался",late:"опоздал",scared:"испугался",afraid:"боишься",angry:"злишься",bored:"скучно",ill:"заболел"};
+  const adj=e.find(w=>ADJ[w]);
+  if(adj && BE.some(b=>e.includes(b)) && !u.some(w=>BE.includes(w))) return {cat:"trap_adj",msg:`«${ADJ[adj]}» по-русски звучит как действие, но по-английски ${adj} — прилагательное, состояние. Поэтому нужен be: ${mainText(t)}`};
+  const VRU={agree:"согласен",need:"нужен",mind:"не против",like:"нравится",owe:"должен",feel:"чувствуешь себя"};
+  const vt=verb?norm(verb).split(" ")[0]:null;
+  if(vt && VRU[vt] && u.some(w=>BE.includes(w)) && !u.some(w=>DO.includes(w))) return {cat:"trap_verb",msg:`По-русски «${VRU[vt]}» — состояние, а по-английски ${vt} — глагол. Глаголу нужен do, а не be.`};
+  return null;
+};
 function curDemos(){ return (CONTENT[ARG]&&CONTENT[ARG].demos)||[]; }
 
 /* ---- module 2: do / does ---- */
@@ -968,7 +1002,7 @@ CONTENT.m2.rules = function(){
 };
 CONTENT.m1.title = "Вопросы с to be";
 CONTENT.m1.idea = "В вопросе форма be прыгает вперёд — перед подлежащим. Никакого do.";
-const CAT_SEC = {order:"formula",aux_missing:"formula",be_form:"forms",do_be:"traps",be_verb:"shortadj",wh:"wh",article:"errors",short:"short",other:"formula"};
+const CAT_SEC = {trap_adj:"trapwords",trap_verb:"shortadj",trap_dative:"trapwords",edging:"trapwords",order:"formula",aux_missing:"formula",be_form:"forms",do_be:"traps",be_verb:"shortadj",wh:"wh",article:"errors",short:"short",other:"formula"};
 
 function secHTML(s){ return `<section class="card lesson-sec" data-sec="${s.id}"><h2>${s.title}</h2>${s.body}</section>`; }
 function tocHTML(secs,lesson){
@@ -1010,7 +1044,7 @@ function mcHTML(C){
       <div class="opts">${ord.map(j=>{ const o=q.opts[j]; return `<button class="opt ${st.wrong.includes(j)?"wrong":""} ${st.done&&j===q.ans?"right":""}" data-act="mc" data-q="${i}" data-o="${j}" ${st.done||st.wrong.includes(j)?"disabled":""}>${esc(o)}</button>`; }).join("")}</div>
       ${st.wrong.length&&!st.done?`<div class="fb warn"><span>${esc(q.hint)}</span></div>`:""}
       ${st.done?`<div class="small" style="color:var(--ok)">${st.wrong.length?"Верно, со второй попытки.":"Верно!"}</div>`:""}</div>`; }).join("")+
-    `<div class="row" style="padding-top:10px"><button class="btn primary" data-act="train" data-id="${C.id}" data-mode="full" ${allDone?"":"disabled"}>Начать тренажёр: 50 заданий</button>${allDone?`<button class="btn" data-act="lesson-restart">Пройти урок ещё раз</button>`:`<span class="muted small">Ответь на все три вопроса</span>`}</div>`;
+    `<div class="row" style="padding-top:10px"><button class="btn primary" data-act="train" data-id="${C.id}" data-mode="full" ${allDone?"":"disabled"}>Начать тренажёр: ${C.tasks.length} ${plural(C.tasks.length,"задание","задания","заданий")}</button>${allDone?`<button class="btn" data-act="lesson-restart">Пройти урок ещё раз</button>`:`<span class="muted small">Ответь на все три вопроса</span>`}</div>`;
 }
 function mcPick(qi,oi){
   const C=CONTENT[ARG], q=C.check[qi], st=MC[qi]||(MC[qi]={wrong:[],done:false});
@@ -1206,7 +1240,7 @@ function viewResults(){
   const bank=(S.bank[r.mid]||[]).length, pass=r.mode==="full"&&first>=Math.ceil(n*.8);
   return `<section class="lesson-sec"><div class="eyebrow">${r.mode==="mistakes"?"Работа над ошибками":"Результат"} · ${esc(m.t)}</div>
     <h1>${first===n?"Идеально!":pass?"Модуль пройден":"Хорошая работа"}</h1>
-    <p class="muted">${r.mode==="full"?(pass?"80% с первой попытки — следующий модуль можно начинать.":"Чтобы модуль засчитался, нужно 80% с первой попытки (40 из 50)."):"Задания, решённые с первой попытки, убраны из банка ошибок."}</p></section>
+    <p class="muted">${r.mode==="full"?(pass?"80% с первой попытки — следующий модуль можно начинать.":`Чтобы модуль засчитался, нужно 80% с первой попытки (${Math.ceil(n*.8)} из ${n}).`):"Задания, решённые с первой попытки, убраны из банка ошибок."}</p></section>
   <section class="card"><div class="score">
     <div><span class="muted small">С первой попытки</span><b style="color:var(--ok)">${first} / ${n}</b></div>
     <div><span class="muted small">С подсказкой</span><b style="color:var(--warn)">${hinted}</b></div>
